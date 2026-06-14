@@ -17,17 +17,17 @@ const ACCESS_TOKEN_KEY = "access_token";
 const REFRESH_TOKEN_KEY = "refresh_token";
 
 const ACCESS_TOKEN_OPTIONS = {
-  httpOnly: false, // Must be readable by server actions for Bearer header
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
+  httpOnly: false, // Must be readable by client components / server actions
+  secure: true, // Always secure in production / cross-site cookies
+  sameSite: "none" as const, // Cross-site cookie support for Vercel + Render
   path: "/",
   maxAge: 15 * 60, // 15 minutes in seconds
 };
 
 const REFRESH_TOKEN_OPTIONS = {
   httpOnly: false,
-  secure: process.env.NODE_ENV === "production",
-  sameSite: "lax" as const,
+  secure: true,
+  sameSite: "none" as const,
   path: "/",
   maxAge: 7 * 24 * 60 * 60, // 7 days in seconds
 };
