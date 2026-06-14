@@ -1,0 +1,569 @@
+<!doctype html>
+<html class="light" lang="en" style="">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>Visit Book - Rajkiran Hospital</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link
+            crossorigin=""
+            href="https://fonts.gstatic.com"
+            rel="preconnect"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            "on-secondary-fixed": "#001f26",
+                            "secondary-fixed-dim": "#67d5f1",
+                            primary: "#000f36",
+                            "inverse-primary": "#b4c5ff",
+                            "on-tertiary-container": "#8b8e92",
+                            "surface-container-highest": "#d8e3fa",
+                            "primary-container": "#0d2357",
+                            "surface-container": "#e7eeff",
+                            "surface-variant": "#d8e3fa",
+                            "on-error": "#ffffff",
+                            "surface-container-high": "#dee8ff",
+                            "surface-container-low": "#f0f3ff",
+                            "on-secondary-fixed-variant": "#004e5d",
+                            "on-primary-fixed": "#00174b",
+                            "on-secondary-container": "#006375",
+                            "on-surface": "#111c2c",
+                            "secondary-fixed": "#aeecff",
+                            "surface-bright": "#f9f9ff",
+                            error: "#ba1a1a",
+                            "surface-dim": "#cfdaf1",
+                            "error-container": "#ffdad6",
+                            "tertiary-container": "#23272b",
+                            "on-error-container": "#93000a",
+                            "on-background": "#111c2c",
+                            "tertiary-fixed": "#e0e2e7",
+                            tertiary: "#0f1216",
+                            "surface-container-lowest": "#ffffff",
+                            "tertiary-fixed-dim": "#c4c6cb",
+                            surface: "#f9f9ff",
+                            "on-primary": "#ffffff",
+                            "on-tertiary-fixed": "#181c20",
+                            "secondary-container": "#74e0fd",
+                            "on-tertiary-fixed-variant": "#44474b",
+                            "inverse-on-surface": "#ebf1ff",
+                            "on-surface-variant": "#45464f",
+                            "surface-tint": "#4a5c93",
+                            "primary-fixed-dim": "#b4c5ff",
+                            "on-secondary": "#ffffff",
+                            secondary: "#00687b",
+                            background: "#f9f9ff",
+                            "outline-variant": "#c5c6d1",
+                            outline: "#757680",
+                            "on-tertiary": "#ffffff",
+                            "primary-fixed": "#dbe1ff",
+                            "on-primary-container": "#7a8cc6",
+                            "on-primary-fixed-variant": "#324479",
+                            "inverse-surface": "#263142",
+                        },
+                        borderRadius: {
+                            DEFAULT: "0.125rem",
+                            lg: "0.25rem",
+                            xl: "0.5rem",
+                            full: "0.75rem",
+                        },
+                        spacing: {
+                            sm: "12px",
+                            "margin-desktop": "64px",
+                            xs: "4px",
+                            md: "24px",
+                            "margin-mobile": "16px",
+                            lg: "48px",
+                            gutter: "24px",
+                            base: "8px",
+                            xl: "80px",
+                        },
+                        fontFamily: {
+                            "headline-lg": ["Source Serif 4"],
+                            "body-md": ["Inter"],
+                            "headline-lg-mobile": ["Source Serif 4"],
+                            "display-brand": ["Source Serif 4"],
+                            caption: ["Inter"],
+                            "body-lg": ["Inter"],
+                            "label-md": ["Inter"],
+                            "headline-md": ["Source Serif 4"],
+                        },
+                        fontSize: {
+                            "headline-lg": [
+                                "32px",
+                                { lineHeight: "40px", fontWeight: "600" },
+                            ],
+                            "body-md": [
+                                "16px",
+                                { lineHeight: "24px", fontWeight: "400" },
+                            ],
+                            "headline-lg-mobile": [
+                                "24px",
+                                { lineHeight: "32px", fontWeight: "600" },
+                            ],
+                            "display-brand": [
+                                "40px",
+                                {
+                                    lineHeight: "48px",
+                                    letterSpacing: "0.02em",
+                                    fontWeight: "700",
+                                },
+                            ],
+                            caption: [
+                                "12px",
+                                { lineHeight: "16px", fontWeight: "400" },
+                            ],
+                            "body-lg": [
+                                "18px",
+                                { lineHeight: "28px", fontWeight: "400" },
+                            ],
+                            "label-md": [
+                                "14px",
+                                { lineHeight: "20px", fontWeight: "600" },
+                            ],
+                            "headline-md": [
+                                "24px",
+                                { lineHeight: "32px", fontWeight: "600" },
+                            ],
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            .glass-card {
+                background: rgba(255, 255, 255, 0.6);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.4);
+            }
+            .medical-shadow {
+                box-shadow: 0px 10px 30px rgba(13, 35, 87, 0.08);
+            }
+        </style>
+    </head>
+    <body
+        class="bg-background text-on-background font-body-md min-h-screen flex flex-col"
+    >
+        <!-- TopNavBar Shared Component -->
+        <header
+            class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary font-label-md text-label-md sticky top-0 z-50 border-b border-surface-variant"
+        >
+            <div
+                class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto h-20"
+            >
+                <!-- Brand -->
+                <div class="flex items-center gap-sm">
+                    <img
+                        alt="Rajkiran Hospital Logo"
+                        class="h-20 w-auto object-contain"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_Pv0tBmQaitJDbv_skivf1rhJ3OA4uiAh9BpB9jfO_ZNuLOnQFQhubvECphiNp83uIkPY1wHWy909MowGHmgvPHrobnhA-MLKToRhAODLeC1m1rv5DzQnvkQ1AR2abHXcRGF8YWMNwoyuE1W77-2SOMss04blzqhhrohoMJ-FO1WzK4qH77yIupS_eqVwUP31OPq-RZ7RFdREGjRzgdDN_JVNc3XeH7q7xlGpPS5_HSIJHh86qkJQ_qD09OkKKIqgKJLCxdAV8w-u"
+                    />
+                </div>
+                <!-- Navigation Links (Web) -->
+                <nav class="hidden md:flex gap-lg items-center">
+                    <a
+                        class="text-secondary dark:text-secondary-fixed font-bold border-b-2 border-secondary pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-70"
+                        href="#"
+                        >Home</a
+                    >
+                    <a
+                        class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-70"
+                        href="#"
+                        >New Patient</a
+                    >
+                    <a
+                        class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-70"
+                        href="#"
+                        >Renew Visit</a
+                    >
+                    <a
+                        class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-70"
+                        href="#"
+                        >Visit Book</a
+                    >
+                    <button
+                        class="flex items-center gap-xs bg-secondary text-on-primary px-md py-xs rounded-full font-label-md hover:opacity-90 transition-all duration-200 cursor-pointer active:opacity-70"
+                    >
+                        <span class="material-symbols-outlined text-[20px]"
+                            >logout</span
+                        ><span class="">Logout</span>
+                    </button>
+                </nav>
+                <!-- Mobile Menu Toggle (Placeholder) -->
+                <button class="md:hidden text-primary">
+                    <span class="material-symbols-outlined text-[24px]"
+                        >menu</span
+                    >
+                </button>
+            </div>
+        </header>
+        <!-- Main Content -->
+        <main
+            class="flex-grow w-full max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop py-lg grid grid-cols-1 md:grid-cols-12 gap-gutter"
+        >
+            <!-- Header & Search Area -->
+            <div class="col-span-1 md:col-span-12 mb-md rounded-lg">
+                <div
+                    class="glass-card medical-shadow rounded-lg p-md flex flex-col md:flex-row gap-sm items-center relative overflow-hidden"
+                >
+                    <div class="relative w-full md:flex-grow flex items-center">
+                        <span
+                            class="material-symbols-outlined absolute left-4 text-outline z-10"
+                            >search</span
+                        >
+                        <input
+                            class="w-full pl-12 pr-4 py-3 rounded-DEFAULT border border-outline-variant bg-white focus:border-primary focus:ring-1 focus:ring-primary text-body-lg font-body-lg z-0 transition-all relative shadow-sm"
+                            placeholder="Search by Patient Name, ID, or Doctor..."
+                            type="text"
+                        />
+                    </div>
+                    <div class="flex gap-sm w-full md:w-auto relative z-10">
+                        <button
+                            class="flex-1 md:flex-none px-6 py-3 bg-primary text-on-primary rounded-DEFAULT font-label-md text-label-md hover:bg-primary-container transition-colors shadow-sm"
+                        >
+                            Search
+                        </button>
+                    </div>
+                </div>
+                <!-- Quick Filters -->
+                <div class="flex gap-xs mt-sm">
+                    <button
+                        class="px-4 py-1.5 rounded-full border border-secondary text-secondary bg-surface-container-low font-caption text-caption hover:bg-secondary-container hover:text-on-secondary-container transition-colors"
+                    >
+                        All Visits
+                    </button>
+                    <button
+                        class="px-4 py-1.5 rounded-full border border-outline-variant text-on-surface-variant bg-white font-caption text-caption hover:bg-surface-container transition-colors"
+                    >
+                        OPD Only
+                    </button>
+                    <button
+                        class="px-4 py-1.5 rounded-full border border-outline-variant text-on-surface-variant bg-white font-caption text-caption hover:bg-surface-container transition-colors"
+                    >
+                        IPD Only
+                    </button>
+                </div>
+            </div>
+            <!-- Visit List Area -->
+            <div class="col-span-1 md:col-span-12">
+                <!-- Group: April 13, 2025 -->
+                <div class="mb-lg relative">
+                    <div
+                        class="sticky top-[73px] z-40 bg-background/95 backdrop-blur-sm py-xs mb-sm bg-surface-container-low/50"
+                    >
+                        <h2
+                            class="font-headline-md text-headline-md text-primary border-b-2 border-secondary inline-block pb-1 tracking-tight"
+                        >
+                            April 13, 2025
+                        </h2>
+                    </div>
+                    <div
+                        class="flex flex-col bg-surface-container-lowest rounded-xl border border-outline-variant/50 medical-shadow overflow-hidden"
+                    >
+                        <!-- Card 1 -->
+                        <div
+                            class="flex flex-col md:flex-row items-center justify-between p-md hover:bg-surface-container-low/50 transition-all border-b border-outline-variant/30 last:border-0 cursor-pointer"
+                        >
+                            <div
+                                class="flex items-center gap-4 w-full md:w-1/3"
+                            >
+                                <div
+                                    class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold shadow-sm"
+                                >
+                                    SR
+                                </div>
+                                <div>
+                                    <h3 class="font-label-md text-on-surface">
+                                        Sharma, Ramesh
+                                    </h3>
+                                    <p
+                                        class="text-caption text-on-surface-variant"
+                                    >
+                                        V-20250413-001
+                                    </p>
+                                </div>
+                                <span
+                                    class="px-3 py-1 rounded-full bg-surface-container-highest text-primary text-caption font-bold border border-primary/20 tracking-wide"
+                                    >OPD</span
+                                >
+                            </div>
+                            <div
+                                class="grid grid-cols-2 md:flex md:flex-1 items-center gap-4 mt-2 md:mt-0 w-full"
+                            >
+                                <div
+                                    class="flex-1 md:border-l md:border-outline-variant/20 md:pl-4"
+                                >
+                                    <p
+                                        class="text-caption text-on-surface-variant"
+                                    >
+                                        Dr. A. Gupta
+                                    </p>
+                                    <p class="text-label-md">Cardiology</p>
+                                </div>
+                                <div
+                                    class="flex-1 md:border-l md:border-outline-variant/20 md:pl-4"
+                                >
+                                    <p
+                                        class="text-caption text-on-surface-variant"
+                                    >
+                                        Time
+                                    </p>
+                                    <p class="text-label-md">09:30 AM</p>
+                                </div>
+                                <div
+                                    class="flex-1 flex items-center gap-2 md:border-l md:border-outline-variant/20 md:pl-4 bg-surface-container-low px-3 py-1 rounded-full w-fit"
+                                >
+                                    <span
+                                        class="w-2 h-2 rounded-full bg-secondary"
+                                    ></span>
+                                    <span class="text-secondary font-label-md"
+                                        >Completed</span
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 2 -->
+                        <div
+                            class="flex flex-col md:flex-row items-center justify-between p-md hover:bg-surface-container-low/50 transition-all border-b border-outline-variant/30 last:border-0 cursor-pointer"
+                        >
+                            <div
+                                class="flex items-center gap-4 w-full md:w-1/3"
+                            >
+                                <div
+                                    class="w-10 h-10 rounded-full bg-secondary flex items-center justify-center text-on-secondary font-bold shadow-sm"
+                                >
+                                    PM
+                                </div>
+                                <div>
+                                    <h3 class="font-label-md text-on-surface">
+                                        Patel, Meera
+                                    </h3>
+                                    <p
+                                        class="text-caption text-on-surface-variant"
+                                    >
+                                        V-20250413-002
+                                    </p>
+                                </div>
+                                <span
+                                    class="px-3 py-1 rounded-full bg-surface-container-highest text-primary text-caption font-bold border border-primary/20 tracking-wide"
+                                    >IPD</span
+                                >
+                            </div>
+                            <div
+                                class="grid grid-cols-2 md:flex md:flex-1 items-center gap-4 mt-2 md:mt-0 w-full"
+                            >
+                                <div
+                                    class="flex-1 md:border-l md:border-outline-variant/20 md:pl-4"
+                                >
+                                    <p
+                                        class="text-caption text-on-surface-variant"
+                                    >
+                                        Dr. S. Reddy
+                                    </p>
+                                    <p class="text-label-md">Orthopedics</p>
+                                </div>
+                                <div
+                                    class="flex-1 md:border-l md:border-outline-variant/20 md:pl-4"
+                                >
+                                    <p
+                                        class="text-caption text-on-surface-variant"
+                                    >
+                                        Ward
+                                    </p>
+                                    <p class="text-label-md">W-3 / 304B</p>
+                                </div>
+                                <div
+                                    class="flex-1 flex items-center gap-2 md:border-l md:border-outline-variant/20 md:pl-4 bg-surface-container-low px-3 py-1 rounded-full w-fit"
+                                >
+                                    <span
+                                        class="w-2 h-2 rounded-full bg-outline"
+                                    ></span>
+                                    <span
+                                        class="text-on-surface-variant font-label-md"
+                                        >Admitted</span
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                        <!-- Card 3 -->
+                        <div
+                            class="flex flex-col md:flex-row items-center justify-between p-md hover:bg-surface-container-low/50 transition-all border-b border-outline-variant/30 last:border-0 cursor-pointer"
+                        >
+                            <div
+                                class="flex items-center gap-4 w-full md:w-1/3"
+                            >
+                                <div
+                                    class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold shadow-sm"
+                                >
+                                    SV
+                                </div>
+                                <div>
+                                    <h3 class="font-label-md text-on-surface">
+                                        Singh, Vikram
+                                    </h3>
+                                    <p
+                                        class="text-caption text-on-surface-variant"
+                                    >
+                                        V-20250413-003
+                                    </p>
+                                </div>
+                                <span
+                                    class="px-3 py-1 rounded-full bg-surface-container-highest text-primary text-caption font-bold border border-primary/20 tracking-wide"
+                                    >OPD</span
+                                >
+                            </div>
+                            <div
+                                class="grid grid-cols-2 md:flex md:flex-1 items-center gap-4 mt-2 md:mt-0 w-full"
+                            >
+                                <div
+                                    class="flex-1 md:border-l md:border-outline-variant/20 md:pl-4"
+                                >
+                                    <p
+                                        class="text-caption text-on-surface-variant"
+                                    >
+                                        Dr. N. Joshi
+                                    </p>
+                                    <p class="text-label-md">Neurology</p>
+                                </div>
+                                <div
+                                    class="flex-1 md:border-l md:border-outline-variant/20 md:pl-4"
+                                >
+                                    <p
+                                        class="text-caption text-on-surface-variant"
+                                    >
+                                        Time
+                                    </p>
+                                    <p class="text-label-md">11:15 AM</p>
+                                </div>
+                                <div
+                                    class="flex-1 flex items-center gap-2 md:border-l md:border-outline-variant/20 md:pl-4 bg-surface-container-low px-3 py-1 rounded-full w-fit"
+                                >
+                                    <span
+                                        class="w-2 h-2 rounded-full bg-secondary animate-pulse"
+                                    ></span>
+                                    <span class="text-secondary font-label-md"
+                                        >In Progress</span
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Group: April 12, 2025 -->
+                <div class="mb-lg relative">
+                    <div
+                        class="sticky top-[73px] z-40 bg-background/95 backdrop-blur-sm py-xs mb-sm bg-surface-container-low/50"
+                    >
+                        <h2
+                            class="font-headline-md text-headline-md text-primary border-b-2 border-secondary inline-block pb-1 tracking-tight"
+                        >
+                            April 12, 2025
+                        </h2>
+                    </div>
+                    <div
+                        class="flex flex-col bg-surface-container-lowest rounded-xl border border-outline-variant/50 medical-shadow overflow-hidden"
+                    >
+                        <!-- Card 4 -->
+                        <div
+                            class="flex flex-col md:flex-row items-center justify-between p-md hover:bg-surface-container-low/50 transition-all border-b border-outline-variant/30 last:border-0 cursor-pointer"
+                        >
+                            <div
+                                class="flex items-center gap-4 w-full md:w-1/3"
+                            >
+                                <div
+                                    class="w-10 h-10 rounded-full bg-primary-container flex items-center justify-center text-on-primary-container font-bold shadow-sm"
+                                >
+                                    DA
+                                </div>
+                                <div>
+                                    <h3 class="font-label-md text-on-surface">
+                                        Desai, Ananya
+                                    </h3>
+                                    <p
+                                        class="text-caption text-on-surface-variant"
+                                    >
+                                        V-20250412-045
+                                    </p>
+                                </div>
+                                <span
+                                    class="px-3 py-1 rounded-full bg-surface-container-highest text-primary text-caption font-bold border border-primary/20 tracking-wide"
+                                    >OPD</span
+                                >
+                            </div>
+                            <div
+                                class="grid grid-cols-2 md:flex md:flex-1 items-center gap-4 mt-2 md:mt-0 w-full"
+                            >
+                                <div
+                                    class="flex-1 md:border-l md:border-outline-variant/20 md:pl-4"
+                                >
+                                    <p
+                                        class="text-caption text-on-surface-variant"
+                                    >
+                                        Dr. K. Menon
+                                    </p>
+                                    <p class="text-label-md">Pediatrics</p>
+                                </div>
+                                <div
+                                    class="flex-1 md:border-l md:border-outline-variant/20 md:pl-4"
+                                >
+                                    <p
+                                        class="text-caption text-on-surface-variant"
+                                    >
+                                        Time
+                                    </p>
+                                    <p class="text-label-md">04:45 PM</p>
+                                </div>
+                                <div
+                                    class="flex-1 flex items-center gap-2 md:border-l md:border-outline-variant/20 md:pl-4 bg-surface-container-low px-3 py-1 rounded-full w-fit"
+                                >
+                                    <span
+                                        class="w-2 h-2 rounded-full bg-outline"
+                                    ></span>
+                                    <span
+                                        class="text-on-surface-variant font-label-md"
+                                        >Completed</span
+                                    >
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+                <!-- Pagination/Load More -->
+                <div class="flex justify-center mt-md">
+                    <button
+                        class="px-6 py-2 border border-primary text-primary rounded-DEFAULT font-label-md text-label-md hover:bg-surface-container-highest transition-colors"
+                    >
+                        Load More Visits
+                    </button>
+                </div>
+            </div>
+        </main>
+        <!-- Footer Shared Component -->
+        <footer
+            class="bg-surface-container-low dark:bg-tertiary-container w-full py-md px-margin-mobile md:px-margin-desktop flex justify-center items-center"
+        >
+            <p
+                class="font-caption text-caption text-on-surface-variant dark:text-on-tertiary-container"
+            >
+                © 2024 Rajkiran Hospital. All rights reserved.
+            </p>
+        </footer>
+    </body>
+</html>

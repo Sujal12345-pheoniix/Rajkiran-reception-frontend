@@ -1,0 +1,410 @@
+<!doctype html>
+<html lang="en" style="">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>Rajkiran Hospital - Secure Login</title>
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <link href="https://fonts.googleapis.com" rel="preconnect" />
+        <link
+            crossorigin=""
+            href="https://fonts.gstatic.com"
+            rel="preconnect"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Source+Serif+4:ital,opsz,wght@0,8..60,200..900;1,8..60,200..900&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            "on-secondary-container": "#006375",
+                            surface: "#f9f9ff",
+                            "on-tertiary-fixed": "#181c20",
+                            "tertiary-fixed": "#e0e2e7",
+                            "on-surface-variant": "#45464f",
+                            "inverse-on-surface": "#ebf1ff",
+                            "surface-container-highest": "#d8e3fa",
+                            "inverse-primary": "#b4c5ff",
+                            "surface-tint": "#4a5c93",
+                            "outline-variant": "#c5c6d1",
+                            background: "#f9f9ff",
+                            "error-container": "#ffdad6",
+                            "surface-bright": "#f9f9ff",
+                            "surface-container-high": "#dee8ff",
+                            "on-tertiary-fixed-variant": "#44474b",
+                            "tertiary-container": "#23272b",
+                            "on-error": "#ffffff",
+                            "on-tertiary": "#ffffff",
+                            "tertiary-fixed-dim": "#c4c6cb",
+                            "inverse-surface": "#263142",
+                            "surface-container-low": "#f0f3ff",
+                            tertiary: "#0f1216",
+                            "surface-container": "#e7eeff",
+                            "primary-fixed-dim": "#b4c5ff",
+                            "secondary-fixed-dim": "#67d5f1",
+                            "surface-variant": "#d8e3fa",
+                            "on-tertiary-container": "#8b8e92",
+                            "surface-dim": "#cfdaf1",
+                            secondary: "#00687b",
+                            "on-surface": "#111c2c",
+                            "on-primary-fixed-variant": "#324479",
+                            "on-background": "#111c2c",
+                            "on-primary": "#ffffff",
+                            "surface-container-lowest": "#ffffff",
+                            "on-primary-container": "#7a8cc6",
+                            "secondary-container": "#74e0fd",
+                            "secondary-fixed": "#aeecff",
+                            "primary-container": "#0d2357",
+                            "on-error-container": "#93000a",
+                            "primary-fixed": "#dbe1ff",
+                            "on-secondary-fixed-variant": "#004e5d",
+                            outline: "#757680",
+                            "on-secondary-fixed": "#001f26",
+                            primary: "#000f36",
+                            error: "#ba1a1a",
+                            "on-primary-fixed": "#00174b",
+                            "on-secondary": "#ffffff",
+                        },
+                        borderRadius: {
+                            DEFAULT: "0.125rem",
+                            lg: "0.25rem",
+                            xl: "0.5rem",
+                            full: "0.75rem",
+                        },
+                        spacing: {
+                            base: "8px",
+                            gutter: "24px",
+                            md: "24px",
+                            "margin-desktop": "64px",
+                            xl: "80px",
+                            "margin-mobile": "16px",
+                            sm: "12px",
+                            xs: "4px",
+                            lg: "48px",
+                        },
+                        fontFamily: {
+                            "body-lg": ["Inter"],
+                            "label-md": ["Inter"],
+                            "headline-md": ["Source Serif 4"],
+                            "headline-lg": ["Source Serif 4"],
+                            "headline-lg-mobile": ["Source Serif 4"],
+                            "body-md": ["Inter"],
+                            "display-brand": ["Source Serif 4"],
+                            caption: ["Inter"],
+                        },
+                        fontSize: {
+                            "body-lg": [
+                                "18px",
+                                { lineHeight: "28px", fontWeight: "400" },
+                            ],
+                            "label-md": [
+                                "14px",
+                                { lineHeight: "20px", fontWeight: "600" },
+                            ],
+                            "headline-md": [
+                                "24px",
+                                { lineHeight: "32px", fontWeight: "600" },
+                            ],
+                            "headline-lg": [
+                                "32px",
+                                { lineHeight: "40px", fontWeight: "600" },
+                            ],
+                            "headline-lg-mobile": [
+                                "24px",
+                                { lineHeight: "32px", fontWeight: "600" },
+                            ],
+                            "body-md": [
+                                "16px",
+                                { lineHeight: "24px", fontWeight: "400" },
+                            ],
+                            "display-brand": [
+                                "40px",
+                                {
+                                    lineHeight: "48px",
+                                    letterSpacing: "0.02em",
+                                    fontWeight: "700",
+                                },
+                            ],
+                            caption: [
+                                "12px",
+                                { lineHeight: "16px", fontWeight: "400" },
+                            ],
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            .glass-card {
+                background: rgba(255, 255, 255, 0.1);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.2);
+            }
+            .medical-shadow {
+                box-shadow: 0px 10px 30px rgba(13, 35, 87, 0.08);
+            }
+            .bg-overlay {
+                background: linear-gradient(
+                    180deg,
+                    rgba(13, 35, 87, 0.8) 0%,
+                    rgba(13, 35, 87, 0.95) 100%
+                );
+            }
+        </style>
+    </head>
+    <body
+        class="bg-surface text-on-surface h-screen w-screen overflow-hidden font-body-md antialiased selection:bg-secondary selection:text-on-secondary"
+    >
+        <!-- Main Layout Container -->
+        <main class="flex h-full w-full flex-col md:flex-row">
+            <!-- Left Panel: Branding & Signage -->
+            <section
+                class="relative hidden w-full flex-col justify-between overflow-hidden bg-primary-container text-on-primary md:flex md:w-1/2 lg:w-[55%] xl:w-[60%] p-margin-desktop"
+            >
+                <!-- Background Image with Overlay -->
+                <div class="absolute inset-0 z-0 blur-sm">
+                    <img
+                        alt="Hospital Reception"
+                        class="h-full w-full object-cover"
+                        src="background.png"
+                    />
+                    <!--<div
+                        class="bg-overlay absolute inset-0 mix-blend-multiply"
+                    ></div>-->
+                </div>
+                <!-- Content Layer -->
+                <div class="relative z-10 flex h-full flex-col justify-between">
+                    <div class="mb-lg flex justify-center">
+                        <img
+                            alt="Rajkiran Hospital Logo"
+                            class="h-96 w-auto object-contain brightness-0 invert mx-auto block"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5AuGzFZ8rhxuKoRteHBsh-nRddbFZLKD-nKk5F_Y9Iu2TECs8je6vgPgKoUke2w7ESfrHokEjOSl4m4oUMFpGN8Knv0fh86-DGey4Vs7mrk58FS3KH0XmFeX2aEUK7O5MJMOMaoLwkxiMrZj5X8hcf9PR_AFn-douH6v13TopXkPL-m2dCJogyK-R_H9rllr9Ls7LU14HY_NQTPKw1-1vthRqRkk8BbV37Ihk3dIf-pz1fZefUS2W7E-xXIBbncliOVpeE30SivBb"
+                        />
+                    </div>
+                    <!-- Logo -->
+
+                    <!-- Center Signage -->
+                    <div class="flex w-full max-w-lg flex-col gap-md">
+                        <!-- OPD Board -->
+
+                        <!-- IPD Board -->
+                    </div>
+                    <!-- Bottom Value Cards -->
+                    <div class="mb-lg flex justify-center">
+                        <div
+                            class="rounded-lg p-sm flex items-center justify-center"
+                        ></div>
+                    </div>
+                    <footer
+                        class="grid grid-cols-3 bg-surface-container-lowest rounded-lg overflow-hidden"
+                    >
+                        <!-- Trust -->
+                        <div
+                            class="flex flex-col items-center justify-center gap-sm p-md text-center border-r border-outline-variant"
+                        >
+                            <div
+                                class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary-container/20 text-secondary-fixed"
+                            >
+                                <span
+                                    class="material-symbols-outlined"
+                                    style="
+                                        font-variation-settings: &quot;FILL&quot;
+                                            1;
+                                    "
+                                    >health_and_safety</span
+                                >
+                            </div>
+                            <span
+                                class="font-label-md text-label-md text-on-surface"
+                                >विश्वास (Trust)</span
+                            >
+                        </div>
+                        <!-- Service -->
+                        <div
+                            class="flex flex-col items-center justify-center gap-sm p-md text-center border-r border-outline-variant"
+                        >
+                            <div
+                                class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary-container/20 text-secondary-fixed"
+                            >
+                                <span
+                                    class="material-symbols-outlined"
+                                    style="
+                                        font-variation-settings: &quot;FILL&quot;
+                                            1;
+                                    "
+                                    >volunteer_activism</span
+                                >
+                            </div>
+                            <span
+                                class="font-label-md text-label-md text-on-surface"
+                                >सेवा (Service)</span
+                            >
+                        </div>
+                        <!-- Health -->
+                        <div
+                            class="flex flex-col items-center justify-center gap-sm p-md text-center"
+                        >
+                            <div
+                                class="flex h-12 w-12 items-center justify-center rounded-full bg-secondary-container/20 text-secondary-fixed"
+                            >
+                                <span
+                                    class="material-symbols-outlined"
+                                    style="
+                                        font-variation-settings: &quot;FILL&quot;
+                                            1;
+                                    "
+                                    >monitor_heart</span
+                                >
+                            </div>
+                            <span
+                                class="font-label-md text-label-md text-on-surface"
+                                >स्वास्थ्य (Health)</span
+                            >
+                        </div>
+                    </footer>
+                </div>
+            </section>
+            <!-- Right Panel: Login Form -->
+            <section
+                class="flex h-full w-full flex-col items-center justify-center bg-surface-container-lowest md:w-1/2 lg:w-[45%] xl:w-[40%]"
+            >
+                <div class="w-full max-w-[420px] px-margin-mobile md:px-0">
+                    <!-- Branding Header -->
+                    <div class="mb-lg flex flex-col items-center text-center">
+                        <img
+                            alt="Rajkiran Hospital Logo"
+                            class="mb-sm h-48 w-auto object-contain"
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuA5AuGzFZ8rhxuKoRteHBsh-nRddbFZLKD-nKk5F_Y9Iu2TECs8je6vgPgKoUke2w7ESfrHokEjOSl4m4oUMFpGN8Knv0fh86-DGey4Vs7mrk58FS3KH0XmFeX2aEUK7O5MJMOMaoLwkxiMrZj5X8hcf9PR_AFn-douH6v13TopXkPL-m2dCJogyK-R_H9rllr9Ls7LU14HY_NQTPKw1-1vthRqRkk8BbV37Ihk3dIf-pz1fZefUS2W7E-xXIBbncliOVpeE30SivBb"
+                        />
+                    </div>
+                    <!-- Form -->
+                    <form class="flex flex-col gap-md">
+                        <!-- Workstation ID -->
+                        <div class="flex flex-col gap-xs">
+                            <label
+                                class="font-label-md text-label-md text-on-surface"
+                                for="workstation-id"
+                                >Workstation ID</label
+                            >
+                            <div class="relative">
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-sm text-outline"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-[20px]"
+                                        >monitor</span
+                                    >
+                                </div>
+                                <input
+                                    class="w-full rounded-DEFAULT border border-outline-variant bg-surface-container-lowest py-sm pl-10 pr-sm font-body-md text-body-md text-on-surface focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container transition-colors"
+                                    id="workstation-id"
+                                    name="workstation-id"
+                                    placeholder="Enter ID"
+                                    required=""
+                                    type="text"
+                                />
+                            </div>
+                        </div>
+                        <!-- Password -->
+                        <div class="flex flex-col gap-xs">
+                            <label
+                                class="font-label-md text-label-md text-on-surface"
+                                for="password"
+                                >Password</label
+                            >
+                            <div class="relative">
+                                <div
+                                    class="pointer-events-none absolute inset-y-0 left-0 flex items-center pl-sm text-outline"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-[20px]"
+                                        >lock</span
+                                    >
+                                </div>
+                                <input
+                                    class="w-full rounded-DEFAULT border border-outline-variant bg-surface-container-lowest py-sm pl-10 pr-10 font-body-md text-body-md text-on-surface focus:border-primary-container focus:outline-none focus:ring-1 focus:ring-primary-container transition-colors"
+                                    id="password"
+                                    name="password"
+                                    placeholder="Enter password"
+                                    required=""
+                                    type="password"
+                                />
+                                <button
+                                    aria-label="Toggle password visibility"
+                                    class="absolute inset-y-0 right-0 flex items-center pr-sm text-outline hover:text-on-surface transition-colors"
+                                    type="button"
+                                >
+                                    <span
+                                        class="material-symbols-outlined text-[20px]"
+                                        >visibility</span
+                                    >
+                                </button>
+                            </div>
+                        </div>
+                        <!-- Actions -->
+                        <div class="mt-sm flex flex-col gap-md">
+                            <button
+                                class="flex w-full items-center justify-center gap-sm rounded-DEFAULT bg-primary-container py-sm font-label-md text-label-md text-on-primary shadow-sm hover:bg-primary transition-colors focus:outline-none focus:ring-2 focus:ring-primary focus:ring-offset-2"
+                                type="submit"
+                            >
+                                <span
+                                    class="material-symbols-outlined text-[18px]"
+                                    >lock</span
+                                >
+                                Secure Entry
+                            </button>
+                            <div class="flex justify-center">
+                                <a
+                                    class="font-caption text-caption text-on-surface-variant hover:text-primary-container hover:underline transition-colors"
+                                    href="#"
+                                >
+                                    IT Support / Forgot Password
+                                </a>
+                            </div>
+                        </div>
+                    </form>
+                    <!-- Security Note -->
+                    <div
+                        class="mt-lg rounded-lg border border-outline-variant bg-surface-container-low p-sm text-center"
+                    >
+                        <div
+                            class="flex items-center justify-center gap-xs text-primary-container mb-xs"
+                        >
+                            <span
+                                class="material-symbols-outlined text-[16px]"
+                                style="
+                                    font-variation-settings: &quot;FILL&quot; 1;
+                                "
+                                >shield</span
+                            >
+                            <span class="font-label-md text-label-md"
+                                >Secure Institutional Access</span
+                            >
+                        </div>
+                        <p
+                            class="font-caption text-caption text-on-surface-variant"
+                        >
+                            This system is restricted to authorized hospital
+                            staff. All access attempts are logged and monitored
+                            in compliance with national health data privacy
+                            regulations.
+                        </p>
+                    </div>
+                </div>
+            </section>
+        </main>
+    </body>
+</html>

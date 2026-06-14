@@ -1,0 +1,362 @@
+<!doctype html>
+<html class="light" lang="en" style="">
+    <head>
+        <meta charset="utf-8" />
+        <meta content="width=device-width, initial-scale=1.0" name="viewport" />
+        <title>Rajkiran Hospital - Home</title>
+        <link
+            href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&amp;family=Source+Serif+4:opsz,wght@8..60,600;8..60,700&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <link
+            href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:wght,FILL@100..700,0..1&amp;display=swap"
+            rel="stylesheet"
+        />
+        <script src="https://cdn.tailwindcss.com?plugins=forms,container-queries"></script>
+        <script id="tailwind-config">
+            tailwind.config = {
+                darkMode: "class",
+                theme: {
+                    extend: {
+                        colors: {
+                            "surface-container-high": "#dee8ff",
+                            "tertiary-container": "#23272b",
+                            "on-primary-container": "#7a8cc6",
+                            "surface-tint": "#4a5c93",
+                            "primary-fixed": "#dbe1ff",
+                            "on-tertiary-container": "#8b8e92",
+                            "primary-fixed-dim": "#b4c5ff",
+                            "on-secondary": "#ffffff",
+                            "secondary-container": "#74e0fd",
+                            "surface-container": "#e7eeff",
+                            primary: "#000f36",
+                            tertiary: "#0f1216",
+                            "inverse-on-surface": "#ebf1ff",
+                            background: "#f9f9ff",
+                            "surface-container-low": "#f0f3ff",
+                            "on-tertiary-fixed-variant": "#44474b",
+                            "inverse-primary": "#b4c5ff",
+                            "surface-container-lowest": "#ffffff",
+                            surface: "#f9f9ff",
+                            "secondary-fixed-dim": "#67d5f1",
+                            "on-surface": "#111c2c",
+                            "error-container": "#ffdad6",
+                            "tertiary-fixed": "#e0e2e7",
+                            "on-error": "#ffffff",
+                            "inverse-surface": "#263142",
+                            "surface-bright": "#f9f9ff",
+                            "on-primary-fixed-variant": "#324479",
+                            "on-background": "#111c2c",
+                            "outline-variant": "#c5c6d1",
+                            "on-tertiary": "#ffffff",
+                            "on-secondary-fixed": "#001f26",
+                            "on-primary-fixed": "#00174b",
+                            "on-error-container": "#93000a",
+                            outline: "#757680",
+                            "primary-container": "#0d2357",
+                            error: "#ba1a1a",
+                            "on-surface-variant": "#45464f",
+                            "surface-container-highest": "#d8e3fa",
+                            "tertiary-fixed-dim": "#c4c6cb",
+                            "on-secondary-container": "#006375",
+                            "surface-dim": "#cfdaf1",
+                            "surface-variant": "#d8e3fa",
+                            "secondary-fixed": "#aeecff",
+                            "on-primary": "#ffffff",
+                            secondary: "#00687b",
+                            "on-tertiary-fixed": "#181c20",
+                            "on-secondary-fixed-variant": "#004e5d",
+                        },
+                        borderRadius: {
+                            DEFAULT: "0.125rem",
+                            lg: "0.25rem",
+                            xl: "0.5rem",
+                            full: "0.75rem",
+                        },
+                        spacing: {
+                            "margin-mobile": "16px",
+                            base: "8px",
+                            xs: "4px",
+                            xl: "80px",
+                            lg: "48px",
+                            "margin-desktop": "64px",
+                            sm: "12px",
+                            md: "24px",
+                            gutter: "24px",
+                        },
+                        fontFamily: {
+                            "headline-md": ["Source Serif 4"],
+                            "headline-lg-mobile": ["Source Serif 4"],
+                            "headline-lg": ["Source Serif 4"],
+                            "label-md": ["Inter"],
+                            "body-md": ["Inter"],
+                            "display-brand": ["Source Serif 4"],
+                            caption: ["Inter"],
+                            "body-lg": ["Inter"],
+                        },
+                        fontSize: {
+                            "headline-md": [
+                                "24px",
+                                {
+                                    lineHeight: "32px",
+                                    fontWeight: "600",
+                                },
+                            ],
+                            "headline-lg-mobile": [
+                                "24px",
+                                {
+                                    lineHeight: "32px",
+                                    fontWeight: "600",
+                                },
+                            ],
+                            "headline-lg": [
+                                "32px",
+                                {
+                                    lineHeight: "40px",
+                                    fontWeight: "600",
+                                },
+                            ],
+                            "label-md": [
+                                "14px",
+                                {
+                                    lineHeight: "20px",
+                                    fontWeight: "600",
+                                },
+                            ],
+                            "body-md": [
+                                "16px",
+                                {
+                                    lineHeight: "24px",
+                                    fontWeight: "400",
+                                },
+                            ],
+                            "display-brand": [
+                                "40px",
+                                {
+                                    lineHeight: "48px",
+                                    letterSpacing: "0.02em",
+                                    fontWeight: "700",
+                                },
+                            ],
+                            caption: [
+                                "12px",
+                                {
+                                    lineHeight: "16px",
+                                    fontWeight: "400",
+                                },
+                            ],
+                            "body-lg": [
+                                "18px",
+                                {
+                                    lineHeight: "28px",
+                                    fontWeight: "400",
+                                },
+                            ],
+                        },
+                    },
+                },
+            };
+        </script>
+        <style>
+            .material-symbols-outlined {
+                font-variation-settings:
+                    "FILL" 0,
+                    "wght" 400,
+                    "GRAD" 0,
+                    "opsz" 24;
+            }
+            .medical-shadow {
+                box-shadow: 0px 10px 30px rgba(13, 35, 87, 0.08);
+            }
+            .glass-card {
+                background: rgba(255, 255, 255, 0.6);
+                backdrop-filter: blur(12px);
+                -webkit-backdrop-filter: blur(12px);
+                border: 1px solid rgba(255, 255, 255, 0.8);
+            }
+        </style>
+    </head>
+    <body
+        class="bg-background text-on-background min-h-screen flex flex-col font-body-md"
+    >
+        <!-- TopNavBar -->
+        <header
+            class="bg-surface dark:bg-inverse-surface text-primary dark:text-inverse-primary font-label-md text-label-md sticky top-0 z-50 border-b border-surface-variant"
+        >
+            <div
+                class="flex justify-between items-center w-full px-margin-mobile md:px-margin-desktop max-w-[1280px] mx-auto h-20"
+            >
+                <!-- Brand -->
+                <div class="flex items-center gap-sm">
+                    <img
+                        alt="Rajkiran Hospital Logo"
+                        class="h-20 w-auto object-contain"
+                        src="https://lh3.googleusercontent.com/aida-public/AB6AXuB_Pv0tBmQaitJDbv_skivf1rhJ3OA4uiAh9BpB9jfO_ZNuLOnQFQhubvECphiNp83uIkPY1wHWy909MowGHmgvPHrobnhA-MLKToRhAODLeC1m1rv5DzQnvkQ1AR2abHXcRGF8YWMNwoyuE1W77-2SOMss04blzqhhrohoMJ-FO1WzK4qH77yIupS_eqVwUP31OPq-RZ7RFdREGjRzgdDN_JVNc3XeH7q7xlGpPS5_HSIJHh86qkJQ_qD09OkKKIqgKJLCxdAV8w-u"
+                    />
+                </div>
+                <!-- Navigation Links (Web) -->
+                <nav class="hidden md:flex gap-lg items-center">
+                    <a
+                        class="text-secondary dark:text-secondary-fixed font-bold border-b-2 border-secondary pb-1 hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-70"
+                        href="#"
+                        >Home</a
+                    >
+                    <a
+                        class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-70"
+                        href="#"
+                        >New Patient</a
+                    >
+                    <a
+                        class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-70"
+                        href="#"
+                        >Renew Visit</a
+                    >
+                    <a
+                        class="text-on-surface-variant dark:text-on-tertiary-container hover:text-primary hover:text-secondary transition-colors duration-200 cursor-pointer active:opacity-70"
+                        href="#"
+                        >Visit Book</a
+                    >
+                    <button
+                        class="flex items-center gap-xs bg-secondary text-on-primary px-md py-xs rounded-full font-label-md hover:opacity-90 transition-all duration-200 cursor-pointer active:opacity-70"
+                    >
+                        <span class="material-symbols-outlined text-[20px]"
+                            >logout</span
+                        ><span class="">Logout</span>
+                    </button>
+                </nav>
+                <!-- Mobile Menu Toggle (Placeholder) -->
+                <button class="md:hidden text-primary">
+                    <span class="material-symbols-outlined text-[24px]"
+                        >menu</span
+                    >
+                </button>
+            </div>
+        </header>
+        <!-- Main Content -->
+        <main
+            class="flex-grow flex flex-col relative w-full max-w-[1280px] mx-auto px-margin-mobile md:px-margin-desktop py-lg"
+        >
+            <!-- Hero Background Accent -->
+            <!-- <div -->
+            <!--   class="absolute inset-0 z-0 overflow-hidden pointer-events-none opacity-30" -->
+            <!-- > -->
+            <!--   <div -->
+            <!--     class="absolute -top-[20%] -right-[10%] w-[60vw] h-[60vw] rounded-full bg-gradient-to-br from-surface-container-high to-transparent blur-3xl" -->
+            <!--   ></div> -->
+            <!--   <div -->
+            <!--     class="absolute bottom-[10%] -left-[10%] w-[40vw] h-[40vw] rounded-full bg-gradient-to-tr from-secondary-container to-transparent blur-3xl opacity-20" -->
+            <!--   ></div> -->
+            <!-- </div> -->
+            <div
+                class="relative z-10 flex flex-col items-center justify-center flex-grow py-g"
+            >
+                <div class="text-center mb-xl max-w-2xl">
+                    <div class="flex justify-center mb-sm">
+                        <img
+                            src="https://lh3.googleusercontent.com/aida-public/AB6AXuBWVmlTfOC4_i-m7glZzYbugXEqRnxvwYU0bat5zYC6msuK23byrRwnHXe5yjyOS-oqFYbrgIr14CmxR14xza64q2IiDKvR2pVpvSzrvy5z_o6OWSZew3P4j-1Pdf58EDT7hr0ukKSXCK-uETK7ev4Y_aDTEakze3nln9YRSkMX9EDU1AZQgqjCZDe6jhEXEYKsnRWKeHlXyzCscsAweuvBZbQntZl_LXgyLzWh2N0xw6srN0GD_gLIL6b2-4sQSxUfzEF-rrP9rgQJ"
+                            alt="Rajkiran Hospital Logo"
+                            class="h-56 w-auto object-contain"
+                        />
+                    </div>
+                </div>
+                <!-- Action Grid -->
+                <div
+                    class="grid grid-cols-1 md:grid-cols-3 gap-gutter w-full max-w-4xl"
+                >
+                    <!-- Action: New Patient -->
+                    <button
+                        class="glass-card rounded-xl p-lg flex flex-col items-center justify-center text-center gap-md group hover:bg-surface-container-low transition-all duration-300 medical-shadow cursor-pointer border border-surface-variant"
+                    >
+                        <div
+                            class="w-20 h-20 rounded-full bg-primary flex items-center justify-center text-on-primary group-hover:scale-105 transition-transform duration-300"
+                        >
+                            <span
+                                class="material-symbols-outlined text-[40px]"
+                                data-icon="person_add"
+                                >person_add</span
+                            >
+                        </div>
+                        <div>
+                            <h2
+                                class="font-headline-md text-headline-md text-primary mb-xs group-hover:text-secondary transition-colors duration-300"
+                            >
+                                New Patient
+                            </h2>
+                            <p
+                                class="font-body-md text-body-md text-on-surface-variant"
+                            >
+                                Register a new patient profile.
+                            </p>
+                        </div>
+                    </button>
+                    <!-- Action: Renew Visit -->
+                    <button
+                        class="glass-card rounded-xl p-lg flex flex-col items-center justify-center text-center gap-md group hover:bg-surface-container-low transition-all duration-300 medical-shadow cursor-pointer border border-surface-variant"
+                    >
+                        <div
+                            class="w-20 h-20 rounded-full bg-secondary flex items-center justify-center text-on-primary group-hover:scale-105 transition-transform duration-300"
+                        >
+                            <span
+                                class="material-symbols-outlined text-[40px]"
+                                data-icon="autorenew"
+                                >autorenew</span
+                            >
+                        </div>
+                        <div>
+                            <h2
+                                class="font-headline-md text-headline-md text-primary mb-xs group-hover:text-secondary transition-colors duration-300"
+                            >
+                                Renew Visit
+                            </h2>
+                            <p
+                                class="font-body-md text-body-md text-on-surface-variant"
+                            >
+                                Update or renew an existing visit.
+                            </p>
+                        </div>
+                    </button>
+                    <!-- Action: Visit Book -->
+                    <button
+                        class="glass-card rounded-xl p-lg flex flex-col items-center justify-center text-center gap-md group hover:bg-surface-container-low transition-all duration-300 medical-shadow cursor-pointer border border-surface-variant"
+                    >
+                        <div
+                            class="w-20 h-20 rounded-full bg-primary-container flex items-center justify-center text-on-primary group-hover:scale-105 transition-transform duration-300"
+                        >
+                            <span
+                                class="material-symbols-outlined text-[40px]"
+                                data-icon="calendar_month"
+                                >calendar_month</span
+                            >
+                        </div>
+                        <div>
+                            <h2
+                                class="font-headline-md text-headline-md text-primary mb-xs group-hover:text-secondary transition-colors duration-300"
+                            >
+                                Visit Book
+                            </h2>
+                            <p
+                                class="font-body-md text-body-md text-on-surface-variant"
+                            >
+                                Filter and find existing visits.
+                            </p>
+                        </div>
+                    </button>
+                </div>
+            </div>
+        </main>
+        <!-- Footer -->
+        <footer
+            class="bg-surface-container-low dark:bg-tertiary-container w-full py-md px-margin-mobile md:px-margin-desktop flex justify-center items-center"
+        >
+            <p
+                class="font-caption text-caption text-on-surface-variant dark:text-on-tertiary-container"
+            >
+                © 2024 Rajkiran Hospital. All rights reserved.
+            </p>
+        </footer>
+    </body>
+</html>
