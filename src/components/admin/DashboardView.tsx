@@ -73,6 +73,7 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
   const router = useRouter();
   const [activeTab, setActiveTab] = useState("dashboard");
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  const [mobileSidebarOpen, setMobileSidebarOpen] = useState(false);
   const [searchTerm, setSearchTerm] = useState("");
 
   const metrics = initialData.metrics;
@@ -126,26 +127,36 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
   };
 
   return (
-    <div className="flex h-screen w-full bg-slate-50 font-sans text-slate-800 antialiased overflow-hidden">
+    <div className="flex h-screen w-full bg-slate-50 font-sans text-slate-800 antialiased overflow-hidden relative">
+      {/* MOBILE SIDEBAR OVERLAY BACKDROP */}
+      {mobileSidebarOpen && (
+        <div
+          onClick={() => setMobileSidebarOpen(false)}
+          className="fixed inset-0 z-40 bg-slate-900/60 backdrop-blur-sm lg:hidden transition-opacity"
+        />
+      )}
+
       {/* LEFT SIDEBAR */}
       <aside
-        className={`flex flex-col bg-slate-900 text-white transition-all duration-300 border-r border-slate-800 ${
-          sidebarCollapsed ? "w-20" : "w-64"
-        }`}
+        className={`flex flex-col bg-slate-900 text-white border-r border-slate-800 transition-all duration-300 fixed inset-y-0 left-0 z-50 lg:static ${
+          mobileSidebarOpen ? "translate-x-0 w-64" : "-translate-x-full lg:translate-x-0"
+        } ${sidebarCollapsed ? "lg:w-20" : "lg:w-64"}`}
       >
         {/* Brand header */}
         <div className="flex h-16 items-center justify-between px-4 border-b border-slate-800 bg-slate-950">
-          {!sidebarCollapsed && (
+          {(!sidebarCollapsed || mobileSidebarOpen) ? (
             <div className="flex items-center gap-2">
               <div className="h-8 w-8 rounded-lg bg-teal-500 flex items-center justify-center font-bold text-white shadow-md shadow-teal-500/20">
                 RH
               </div>
               <span className="font-semibold text-lg tracking-wider text-teal-400">RAJKIRAN</span>
             </div>
+          ) : (
+            <div className="mx-auto h-8 w-8 rounded-lg bg-teal-500 flex items-center justify-center font-bold text-white" />
           )}
           <button
             onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
-            className="p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition"
+            className="hidden lg:block p-1 rounded-md text-slate-400 hover:text-white hover:bg-slate-800 transition"
           >
             {sidebarCollapsed ? <ChevronRight size={18} /> : <ChevronLeft size={18} />}
           </button>
@@ -159,7 +170,10 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
             return (
               <button
                 key={item.id}
-                onClick={() => setActiveTab(item.id)}
+                onClick={() => {
+                  setActiveTab(item.id);
+                  setMobileSidebarOpen(false); // Close on mobile click
+                }}
                 className={`flex items-center w-full px-3 py-2.5 rounded-lg text-sm font-medium transition-colors ${
                   isActive
                     ? "bg-teal-600 text-white shadow-md shadow-teal-600/10"
@@ -167,7 +181,7 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
                 }`}
               >
                 <Icon size={18} className={isActive ? "text-white" : "text-slate-400"} />
-                {!sidebarCollapsed && <span className="ml-3 truncate">{item.label}</span>}
+                {(!sidebarCollapsed || mobileSidebarOpen) && <span className="ml-3 truncate">{item.label}</span>}
               </button>
             );
           })}
@@ -175,7 +189,7 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
 
         {/* User profile footer info */}
         <div className="p-4 border-t border-slate-800 bg-slate-950/50 flex flex-col gap-2">
-          {!sidebarCollapsed && (
+          {(!sidebarCollapsed || mobileSidebarOpen) && (
             <div className="flex items-center gap-3">
               <div className="h-9 w-9 rounded-full bg-slate-700 flex items-center justify-center font-semibold text-white">
                 A
@@ -191,7 +205,7 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
             className="flex items-center justify-center w-full py-2 bg-rose-950/30 hover:bg-rose-900/40 border border-rose-800/40 text-rose-300 rounded-lg text-xs font-medium transition"
           >
             <LogOut size={14} />
-            {!sidebarCollapsed && <span className="ml-2">Logout Console</span>}
+            {(!sidebarCollapsed || mobileSidebarOpen) && <span className="ml-2">Logout Console</span>}
           </button>
         </div>
       </aside>
@@ -199,24 +213,30 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
       {/* MAIN CONTENT AREA */}
       <div className="flex-1 flex flex-col min-w-0 overflow-hidden">
         {/* TOP NAVBAR */}
-        <header className="flex h-16 w-full items-center justify-between px-6 border-b border-slate-200 bg-white shadow-sm">
+        <header className="flex h-16 w-full items-center justify-between px-4 lg:px-6 border-b border-slate-200 bg-white shadow-sm gap-4">
           <div className="flex items-center gap-3">
-            <h1 className="text-lg font-semibold text-slate-900">Hospital Control Center</h1>
-            <span className="hidden sm:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-teal-50 text-teal-700 border border-teal-200">
+            <button
+              onClick={() => setMobileSidebarOpen(true)}
+              className="p-1.5 rounded-lg text-slate-600 hover:bg-slate-100 lg:hidden transition"
+            >
+              <Menu size={20} />
+            </button>
+            <h1 className="text-base lg:text-lg font-semibold text-slate-900 truncate">Hospital Control Center</h1>
+            <span className="hidden md:inline-flex items-center px-2 py-0.5 rounded text-[10px] font-medium bg-teal-50 text-teal-700 border border-teal-200">
               Live Connection
             </span>
           </div>
 
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3 lg:gap-4">
             {/* Search Input bar */}
-            <div className="relative w-64">
-              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-slate-400" />
+            <div className="relative w-40 sm:w-48 md:w-64">
+              <Search className="absolute left-2.5 top-2.5 h-3.5 w-3.5 text-slate-400" />
               <input
                 type="text"
-                placeholder="Search metrics, registry..."
+                placeholder="Search registry..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="w-full pl-9 pr-4 py-1.5 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none"
+                className="w-full pl-8 pr-3 py-1.5 rounded-lg border border-slate-200 text-xs focus:ring-2 focus:ring-teal-500 focus:outline-none"
               />
             </div>
             {/* Action icons */}
@@ -224,8 +244,8 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
               <Bell size={18} />
               <span className="absolute top-1 right-1 h-1.5 w-1.5 rounded-full bg-rose-500"></span>
             </button>
-            <span className="h-6 w-px bg-slate-200"></span>
-            <span className="text-xs font-medium text-slate-600">Rajkiran Enterprise ERP v1.2</span>
+            <span className="hidden md:block h-6 w-px bg-slate-200"></span>
+            <span className="hidden md:block text-xs font-medium text-slate-600">Rajkiran Enterprise ERP</span>
           </div>
         </header>
 
