@@ -67,7 +67,7 @@ export const api: KyInstance = ky.create({
   credentials: "include",
   timeout: 30000,
   retry: 0, // Don't auto-retry — let our refresh logic handle it
-} as any);
+});
 
 // ─── Auth Endpoints ───────────────────────────────────────────────────────────
 export const receptionistLoginRequest = (data: {
