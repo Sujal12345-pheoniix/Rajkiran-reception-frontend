@@ -16,6 +16,7 @@ import { Header } from "@/components/Header";
 import { useEffect, useState, useMemo, useCallback } from "react";
 import { getVisitsRequest } from "@/lib/api-client";
 import { getAccessToken } from "@/lib/auth";
+import Link from "next/link";
 
 type VisitFromAPI = {
   visit_id: string;
@@ -107,6 +108,14 @@ function VisitCard({ visit }: { visit: VisitFromAPI }) {
           }`}>
             {visit.bill.payment_status}
           </span>
+        </div>
+        <div className="md:border-l md:border-gray-200 md:pl-4 flex items-center">
+          <Link
+            href={`/reception/patient-profile/${visit.patient.unique_id}`}
+            className="text-xs font-bold text-blue-600 hover:text-blue-700 bg-blue-50 hover:bg-blue-100 px-3 py-1.5 rounded-lg transition"
+          >
+            View Profile
+          </Link>
         </div>
       </div>
     </div>

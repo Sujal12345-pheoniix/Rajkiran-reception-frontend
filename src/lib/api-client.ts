@@ -249,6 +249,46 @@ export const getAnalyticsRequest = (accessToken: string): Promise<ApiResponse<an
     .json<ApiResponse<any>>();
 };
 
+export const getAuditLogsRequest = (accessToken: string): Promise<ApiResponse<any[]>> => {
+  return api
+    .get("analytics/logs", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    .json<ApiResponse<any[]>>();
+};
+
+export const getBillsReportRequest = (accessToken: string): Promise<ApiResponse<any[]>> => {
+  return api
+    .get("analytics/bills", {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    .json<ApiResponse<any[]>>();
+};
+
+export const logPatientDownloadRequest = (
+  patientId: string,
+  accessToken: string,
+): Promise<ApiResponse<boolean>> => {
+  return api
+    .post(`patient/${patientId}/log-download`, {
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    .json<ApiResponse<boolean>>();
+};
+
+export const updatePatientRequest = (
+  patientId: string,
+  data: any,
+  accessToken: string,
+): Promise<ApiResponse<any>> => {
+  return api
+    .patch(`patient/${patientId}`, {
+      json: data,
+      headers: { Authorization: `Bearer ${accessToken}` },
+    })
+    .json<ApiResponse<any>>();
+};
+
 // ─── Error Helper ─────────────────────────────────────────────────────────────
 export async function extractApiError(e: any): Promise<string> {
   if (e?.response) {

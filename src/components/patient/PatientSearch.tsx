@@ -148,13 +148,21 @@ export default function PatientSearch() {
                         </div>
                       </div>
                     </div>
-                    <Link
-                      href={`/reception/${patient.unique_id}`}
-                      className="text-blue-600 hover:text-blue-700 transition flex items-center gap-1 text-sm font-medium px-3 py-1.5 rounded-lg hover:bg-blue-50"
-                    >
-                      Visit
-                      <ArrowRight className="w-4 h-4 group-hover:translate-x-0.5 transition-transform" />
-                    </Link>
+                    <div className="flex items-center gap-2">
+                      <Link
+                        href={`/reception/patient-profile/${patient.unique_id}`}
+                        className="text-slate-600 hover:text-blue-600 border border-slate-200 hover:bg-slate-50 transition flex items-center gap-1 text-xs font-semibold px-3 py-2 rounded-lg"
+                      >
+                        View Complete Profile
+                      </Link>
+                      <Link
+                        href={`/reception/${patient.unique_id}`}
+                        className="bg-blue-600 hover:bg-blue-700 text-white transition flex items-center gap-1 text-xs font-semibold px-3 py-2 rounded-lg"
+                      >
+                        Create Visit
+                        <ArrowRight className="w-3.5 h-3.5" />
+                      </Link>
+                    </div>
                   </li>
                 ))}
               </ul>

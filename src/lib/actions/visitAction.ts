@@ -10,50 +10,54 @@ export type VisitFormState = {
   data?: any;
 };
 
-// ─── Create Visit ─────────────────────────────────────────────────────────────
-// BUG FIX: Was a stub with a fake setTimeout. Now calls the real API.
-// BUG FIX: Removed bad import { errorToJSON } from "next/dist/server/render"
 export async function createVisit(
   _prevState: VisitFormState,
   formData: FormData,
 ): Promise<VisitFormState> {
-  // Extract form data
+  const patientId = formData.get("patientId") as string;
+  const doctorId = formData.get("doctorId") as string;
+  const assignmentType = (formData.get("assignmentType") as string) || "OPD";
+
+  // Vitals
   const bloodPressure = formData.get("bloodPressure") as string;
   const heartRate = formData.get("heartRate") as string;
   const temperature = formData.get("temperature") as string;
   const weight = formData.get("weight") as string;
   const height = formData.get("height") as string;
-  const assignmentType = (formData.get("assignmentType") as string) || "OPD";
-  const doctorId = formData.get("doctorId") as string;
-  const patientId = formData.get("patientId") as string;
+  const oxygenSaturation = formData.get("oxygenSaturation") as string;
+  const respiratoryRate = formData.get("respiratoryRate") as string;
+  const bloodSugar = formData.get("bloodSugar") as string;
+  const painScale = formData.get("painScale") as string;
+
+  // Visit details
+  const symptomsRaw = formData.get("symptoms") as string; // Comma separated
+  const symptoms = symptomsRaw ? symptomsRaw.split(",").map(s => s.trim()).filter(Boolean) : [];
+  
+  const knownDiseasesRaw = formData.get("knownDiseases") as string; // Comma separated
+  const knownDiseases = knownDiseasesRaw ? knownDiseasesRaw.split(",").map(d => d.trim()).filter(Boolean) : [];
+
+  const chiefComplaint = formData.get("chiefComplaint") as string;
+  const visitNotes = formData.get("visitNotes") as string;
+
+  // Billing
+  const consultationFee = formData.get("consultationFee") as string;
+  const registrationFee = formData.get("registrationFee") as string;
+  const testsFee = formData.get("testsFee") as string;
+  const medicinesFee = formData.get("medicinesFee") as string;
   const extraCharge = formData.get("extraCharge") as string;
+  const discount = formData.get("discount") as string;
+  const tax = formData.get("tax") as string;
+  const grandTotal = formData.get("grandTotal") as string;
+
   const paymentMethod = (formData.get("paymentMethod") as string) || "cash";
   const paymentStatus = (formData.get("paymentStatus") as string) || "pending";
 
   // Validation
   const errors: Record<string, string[]> = {};
 
-  if (!bloodPressure) errors.bloodPressure = ["Blood pressure is required"];
-  if (!heartRate) errors.heartRate = ["Heart rate is required"];
-  else if (isNaN(Number(heartRate)) || Number(heartRate) < 20 || Number(heartRate) > 300) {
-    errors.heartRate = ["Heart rate must be between 20 and 300 BPM"];
-  }
-  if (!temperature) errors.temperature = ["Temperature is required"];
-  else if (isNaN(Number(temperature)) || Number(temperature) < 90 || Number(temperature) > 115) {
-    errors.temperature = ["Temperature must be between 90°F and 115°F"];
-  }
-  if (!weight) errors.weight = ["Weight is required"];
-  else if (isNaN(Number(weight)) || Number(weight) < 1 || Number(weight) > 500) {
-    errors.weight = ["Weight must be between 1 and 500 kg"];
-  }
-  if (!height) errors.height = ["Height is required"];
-  else if (isNaN(Number(height)) || Number(height) < 30 || Number(height) > 300) {
-    errors.height = ["Height must be between 30 and 300 cm"];
-  }
-
-  if (assignmentType === "OPD") {
-    if (!doctorId) errors.doctor = ["Please select a doctor"];
-    if (!patientId) errors.patient = ["Patient ID is required"];
+  if (!patientId) errors.patient = ["Patient ID is required"];
+  if (assignmentType === "OPD" && !doctorId) {
+    errors.doctor = ["Please select a doctor"];
   }
 
   if (Object.keys(errors).length > 0) {
@@ -69,11 +73,15 @@ export async function createVisit(
     };
   }
 
-  const visitData: VisitCreateData = {
+  const visitData: any = {
     visit: {
       patientId: patientId,
-      doctorId: doctorId,
-      visit_type: assignmentType as "OPD" | "IPD",
+      doctorId: doctorId || undefined,
+      visit_type: assignmentType,
+      symptoms,
+      known_diseases: knownDiseases,
+      chief_complaint: chiefComplaint || undefined,
+      visit_notes: visitNotes || undefined,
     },
     vital: {
       blood_pressure: bloodPressure || undefined,
@@ -81,9 +89,20 @@ export async function createVisit(
       temperature: temperature ? parseFloat(temperature) : undefined,
       weight: weight ? parseFloat(weight) : undefined,
       height: height ? parseFloat(height) : undefined,
+      oxygen_saturation: oxygenSaturation ? parseInt(oxygenSaturation) : undefined,
+      respiratory_rate: respiratoryRate ? parseInt(respiratoryRate) : undefined,
+      blood_sugar: bloodSugar ? parseInt(bloodSugar) : undefined,
+      pain_scale: painScale ? parseInt(painScale) : undefined,
     },
     bill: {
+      consultation_fee: consultationFee ? parseFloat(consultationFee) : 0,
+      registration_fee: registrationFee ? parseFloat(registrationFee) : 0,
+      tests_fee: testsFee ? parseFloat(testsFee) : 0,
+      medicines_fee: medicinesFee ? parseFloat(medicinesFee) : 0,
       extra_charge: extraCharge ? parseFloat(extraCharge) : 0,
+      discount: discount ? parseFloat(discount) : 0,
+      tax: tax ? parseFloat(tax) : 0,
+      grand_total: grandTotal ? parseFloat(grandTotal) : 0,
       payment_status: paymentStatus,
       payment_method: paymentMethod,
     },
