@@ -73,17 +73,32 @@ export async function getRefreshToken(): Promise<string | undefined> {
   return cookieStore.get(REFRESH_TOKEN_KEY)?.value;
 }
 
+function decodeJwt(token: string): any | null {
+  try {
+    const parts = token.split(".");
+    if (parts.length !== 3) return null;
+    const payload = JSON.parse(Buffer.from(parts[1], "base64").toString());
+    const now = Math.floor(Date.now() / 1000);
+    if (payload.exp && payload.exp < now) return null;
+    return payload;
+  } catch {
+    return null;
+  }
+}
+
 // ─── Session Verification (cached per request) ────────────────────────────────
-// BUG FIX: Was called on every page without caching, causing multiple
-// concurrent API calls. Now cached per server request lifecycle using React cache().
+// OPTIMIZATION: Decodes JWT payload locally to avoid round-trip network API requests.
 export const verifySession = cache(async (): Promise<any | null> => {
   const accessToken = await getAccessToken();
 
   if (accessToken) {
-    try {
-      return await authMeRequest(accessToken);
-    } catch {
-      // Access token expired — try refresh
+    const decoded = decodeJwt(accessToken);
+    if (decoded) {
+      return {
+        user_id: decoded.sub,
+        username: decoded.username,
+        role: decoded.role,
+      };
     }
   }
 
@@ -102,7 +117,16 @@ export const verifySession = cache(async (): Promise<any | null> => {
     if (!newAccessToken || !newRefreshToken) return null;
 
     await setAuthCookies(newAccessToken, newRefreshToken);
-    return await authMeRequest(newAccessToken);
+    
+    const decoded = decodeJwt(newAccessToken);
+    if (decoded) {
+      return {
+        user_id: decoded.sub,
+        username: decoded.username,
+        role: decoded.role,
+      };
+    }
+    return null;
   } catch {
     // Refresh failed — clear stale cookies
     await clearAuthCookies();
