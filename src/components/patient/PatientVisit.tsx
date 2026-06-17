@@ -351,6 +351,7 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
       {/* Hidden bindings */}
       <input type="hidden" name="patientId" value={patientId} />
       <input type="hidden" name="doctorId" value={selectedDoctorId} />
+      <input type="hidden" name="assignmentType" value="OPD" />
       <input type="hidden" name="symptoms" value={selectedSymptoms.join(",")} />
       <input type="hidden" name="knownDiseases" value={selectedKnownDiseases.join(",")} />
       <input type="hidden" name="consultationFee" value={consultationFee} />
@@ -622,75 +623,7 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
           </section>
         </div>
 
-        {/* Right Column: Visit Type, Assignment, Billing */}
         <div className="space-y-6">
-          {/* Assignment panel */}
-          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
-            <h3 className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-100">Assignment File</h3>
-            
-            <div className="flex gap-4">
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="radio"
-                  name="assignmentType"
-                  value="OPD"
-                  checked={assignmentType === "OPD"}
-                  onChange={() => setAssignmentType("OPD")}
-                  className="accent-blue-600"
-                />
-                <span className="text-xs font-semibold text-slate-700">OPD Outpatient</span>
-              </label>
-              <label className="flex items-center gap-1.5 cursor-pointer">
-                <input
-                  type="radio"
-                  name="assignmentType"
-                  value="IPD"
-                  checked={assignmentType === "IPD"}
-                  onChange={() => {
-                    setAssignmentType("IPD");
-                    setSelectedDoctorId("");
-                    setSelectedDepartmentId("");
-                  }}
-                  className="accent-blue-600"
-                />
-                <span className="text-xs font-semibold text-slate-700">IPD Inpatient</span>
-              </label>
-            </div>
-
-            {assignmentType === "OPD" && (
-              <div className="space-y-3">
-                <div>
-                  <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Department</label>
-                  <select
-                    value={selectedDepartmentId}
-                    onChange={(e) => setSelectedDepartmentId(e.target.value)}
-                    className="w-full text-xs px-3 py-2 border rounded-lg bg-slate-50/50"
-                  >
-                    <option value="">Select Department</option>
-                    {departments.map((dept) => (
-                      <option key={dept.department_id} value={dept.department_id}>{dept.name}</option>
-                    ))}
-                  </select>
-                </div>
-                {selectedDepartmentId && (
-                  <div>
-                    <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Consultant Doctor</label>
-                    <select
-                      value={selectedDoctorId}
-                      onChange={(e) => setSelectedDoctorId(e.target.value)}
-                      className="w-full text-xs px-3 py-2 border rounded-lg bg-slate-50/50"
-                    >
-                      <option value="">Select Doctor</option>
-                      {filteredDoctors.map((doc) => (
-                        <option key={doc.doctor_id} value={doc.doctor_id}>Dr. {doc.first_name} {doc.last_name}</option>
-                      ))}
-                    </select>
-                  </div>
-                )}
-              </div>
-            )}
-          </section>
-
           {/* Billing panel */}
           <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
             <h3 className="font-bold text-slate-900 text-sm pb-2 border-b border-slate-100">Itemized Billing Charges</h3>

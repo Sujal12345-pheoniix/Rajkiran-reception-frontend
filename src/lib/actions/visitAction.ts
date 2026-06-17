@@ -2,6 +2,7 @@
 
 import { createVisitRequest, extractApiError, type VisitCreateData } from "../api-client";
 import { getAccessToken } from "../auth";
+import { revalidatePath } from "next/cache";
 
 export type VisitFormState = {
   success?: boolean;
@@ -56,9 +57,6 @@ export async function createVisit(
   const errors: Record<string, string[]> = {};
 
   if (!patientId) errors.patient = ["Patient ID is required"];
-  if (assignmentType === "OPD" && !doctorId) {
-    errors.doctor = ["Please select a doctor"];
-  }
 
   if (Object.keys(errors).length > 0) {
     return { success: false, errors };
@@ -110,6 +108,7 @@ export async function createVisit(
 
   try {
     const res = await createVisitRequest(visitData, accessToken);
+    revalidatePath("/reception/visit-book");
     return {
       success: true,
       message: "Visit created successfully",
