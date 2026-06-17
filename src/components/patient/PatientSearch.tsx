@@ -46,14 +46,21 @@ export default function PatientSearch() {
     });
   }, []);
 
-  // BUG FIX: Added debounce to avoid hammering API on every keystroke
+  // Real debouncing implementation
   const handleInputChange = (value: string) => {
     setSearchTerm(value);
     if (!value.trim()) {
       setResult(null);
       setHasSearched(false);
       setError(null);
+      if (debounceRef.current) clearTimeout(debounceRef.current);
+      return;
     }
+
+    if (debounceRef.current) clearTimeout(debounceRef.current);
+    debounceRef.current = setTimeout(() => {
+      handleSearch(value);
+    }, 250);
   };
 
   const handleClear = () => {
@@ -61,6 +68,7 @@ export default function PatientSearch() {
     setResult(null);
     setHasSearched(false);
     setError(null);
+    if (debounceRef.current) clearTimeout(debounceRef.current);
   };
 
   return (

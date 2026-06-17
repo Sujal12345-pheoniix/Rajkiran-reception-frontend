@@ -32,7 +32,7 @@ export default function PatientForm() {
       </div>
 
       {/* Global Error */}
-      {state.success === false && state.message && (
+      {state.success === false && state.message && state.message !== "DUPLICATE_PATIENT" && (
         <div className="bg-red-50 border border-red-200 rounded-lg p-4 flex gap-3 items-start">
           <svg className="w-5 h-5 text-red-500 mt-0.5 flex-shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor">
             <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
@@ -40,6 +40,62 @@ export default function PatientForm() {
           <div>
             <p className="text-red-700 font-semibold">Registration Failed</p>
             <p className="text-red-600 text-sm mt-0.5">{state.message}</p>
+          </div>
+        </div>
+      )}
+
+      {/* Smart Duplicate Patient Found UI */}
+      {state.success === false && state.message === "DUPLICATE_PATIENT" && state.duplicatePatient && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl p-6 shadow-sm flex flex-col md:flex-row gap-5 items-start justify-between transition-all duration-300">
+          <div className="flex gap-4">
+            <div className="p-3 bg-amber-100 rounded-full text-amber-700 mt-1">
+              <svg className="w-6 h-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="text-amber-900 font-bold text-lg leading-6">Existing Patient Found</h3>
+              <p className="text-slate-600 text-sm mt-1">
+                A patient record already exists with this mobile number.
+              </p>
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-y-1 gap-x-4 mt-3 bg-white p-3 rounded-lg border border-amber-100 text-xs">
+                <div>
+                  <span className="text-slate-400 font-medium block uppercase tracking-wider text-[9px]">Patient Name</span>
+                  <span className="font-bold text-slate-800">{state.duplicatePatient.first_name} {state.duplicatePatient.last_name}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-medium block uppercase tracking-wider text-[9px]">Patient ID</span>
+                  <span className="font-mono font-bold text-slate-800">{state.duplicatePatient.unique_id}</span>
+                </div>
+                <div>
+                  <span className="text-slate-400 font-medium block uppercase tracking-wider text-[9px]">Previous Visit Count</span>
+                  <span className="font-bold text-slate-800">{state.duplicatePatient.visits_count}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div className="flex flex-col sm:flex-row gap-2 w-full md:w-auto md:self-center">
+            <button
+              type="button"
+              onClick={() => router.push(`/reception/patient-profile/${state.duplicatePatient?.unique_id}`)}
+              className="px-4 py-2.5 text-xs font-semibold rounded-lg bg-amber-600 text-white hover:bg-amber-700 transition"
+            >
+              Open Existing Patient
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(`/reception/${state.duplicatePatient?.unique_id}`)}
+              className="px-4 py-2.5 text-xs font-semibold rounded-lg bg-blue-600 text-white hover:bg-blue-700 transition"
+            >
+              Create Follow-Up Visit
+            </button>
+            <button
+              type="button"
+              onClick={() => router.push(`/reception/patient-profile/${state.duplicatePatient?.unique_id}?edit=true`)}
+              className="px-4 py-2.5 text-xs font-semibold rounded-lg border border-slate-300 bg-white text-slate-700 hover:bg-slate-50 transition"
+            >
+              Update Patient Details
+            </button>
           </div>
         </div>
       )}

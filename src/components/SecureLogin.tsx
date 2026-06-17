@@ -15,6 +15,7 @@ import { useEffect, useState, type ComponentType, type SVGProps } from "react";
 import { useActionState } from "react";
 import { login } from "../lib/auth";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 
 type Icon = ComponentType<SVGProps<SVGSVGElement>>;
 
@@ -190,13 +191,19 @@ export function SecureLogin() {
                   </>
                 )}
               </button>
-              <div className="flex justify-center">
+              <div className="flex justify-between items-center text-xs">
                 <a
-                  className="text-xs leading-4 text-foreground-muted transition-colors hover:text-brand-primary hover:underline"
+                  className="leading-4 text-foreground-muted transition-colors hover:text-brand-primary hover:underline"
                   href="#"
                 >
                   IT Support / Forgot Password
                 </a>
+                <Link
+                  className="leading-4 font-bold text-brand-primary transition-colors hover:text-brand-secondary hover:underline flex items-center gap-1"
+                  href="/admin/auth"
+                >
+                  <Shield size={14} className="inline-block" /> Admin Portal
+                </Link>
               </div>
             </div>
           </form>

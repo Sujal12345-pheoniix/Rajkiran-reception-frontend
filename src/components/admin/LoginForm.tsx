@@ -4,6 +4,7 @@ import { useActionState } from "react";
 import { User, Lock, LogIn, AlertCircle } from "lucide-react";
 import { loginAction, type LoginState } from "@/lib/actions/adminAuth";
 import Image from "next/image";
+import Link from "next/link";
 
 export default function LoginForm() {
   const [state, formAction, pending] = useActionState<LoginState, FormData>(
@@ -136,6 +137,14 @@ export default function LoginForm() {
                 </>
               )}
             </button>
+            <div className="flex justify-center mt-2">
+              <Link
+                className="text-xs font-bold text-blue-600 transition-colors hover:text-blue-800 hover:underline flex items-center gap-1"
+                href="/auth"
+              >
+                ← Receptionist Entry
+              </Link>
+            </div>
           </form>
         </div>
       </div>

@@ -414,59 +414,6 @@ export default function PatientProfilePage({
             </table>
           </div>
         </div>
-
-        {/* Labs & Active Medication Records */}
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 print:break-inside-avoid">
-          {/* Diagnostic Lab Reports */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <h3 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-3 mb-4">Diagnostic Lab Reports</h3>
-            <div className="space-y-3">
-              {[
-                { name: "Complete Blood Count (CBC)", type: "Lab Report", date: lastVisitDate },
-                { name: "HbA1c & Fasting Blood Sugar", type: "Lab Report", date: lastVisitDate },
-                { name: "Chest X-Ray Digital", type: "Radiology", date: lastVisitDate },
-                { name: "Electrocardiogram (ECG)", type: "Cardio", date: "45 days ago" },
-              ].map((lab, idx) => (
-                <div key={idx} className="flex justify-between items-center p-3 border border-slate-100 rounded-lg hover:bg-slate-50 transition">
-                  <div>
-                    <h4 className="text-xs font-semibold text-slate-800">{lab.name}</h4>
-                    <span className="text-[10px] text-slate-400">{lab.type} • Dated: {lab.date}</span>
-                  </div>
-                  <button
-                    onClick={handleDownloadReport}
-                    className="p-2 bg-slate-100 hover:bg-blue-50 text-slate-600 hover:text-blue-600 transition rounded-lg"
-                    title="Download Report File"
-                  >
-                    <Download className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              ))}
-            </div>
-          </div>
-
-          {/* Active Medication History */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <h3 className="font-bold text-slate-900 text-sm border-b border-slate-100 pb-3 mb-4">Medication & Prescriptions History</h3>
-            <div className="space-y-3">
-              {[
-                { name: "Tab. Metformin 500mg", dosage: "1-0-1 (Post Meals)", dur: "3 Months", status: "Active", dr: "Dr. Vikram Verma" },
-                { name: "Tab. Amlodipine 5mg", dosage: "0-0-1 (Before Sleep)", dur: "3 Months", status: "Active", dr: "Dr. Vikram Verma" },
-                { name: "Syp. Ascoril 10ml", dosage: "1-1-1", dur: "5 Days", status: "Completed", dr: "Dr. Aarav Sharma" },
-              ].map((med, idx) => (
-                <div key={idx} className="flex justify-between items-start p-3 border border-slate-100 rounded-lg">
-                  <div>
-                    <h4 className="text-xs font-bold text-slate-800">{med.name}</h4>
-                    <div className="text-[10px] text-slate-500 mt-0.5">Dosage: {med.dosage} • Duration: {med.dur}</div>
-                    <span className="text-[9px] text-slate-400">Prescribed by {med.dr}</span>
-                  </div>
-                  <span className={`px-2 py-0.5 rounded-full text-[9px] font-semibold ${
-                    med.status === "Active" ? "bg-teal-50 text-teal-700 border border-teal-200" : "bg-slate-100 text-slate-600"
-                  }`}>{med.status}</span>
-                </div>
-              ))}
-            </div>
-          </div>
-        </div>
       </main>
       <Footer />
     </div>

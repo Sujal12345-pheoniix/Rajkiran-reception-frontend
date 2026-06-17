@@ -12,6 +12,13 @@ export type PatientFormState = {
   success?: boolean;
   message?: string;
   errors?: Record<string, string[]>;
+  duplicatePatient?: {
+    patient_id: string;
+    unique_id: string;
+    first_name: string;
+    last_name: string;
+    visits_count: number;
+  };
 };
 
 export type PatientFormData = {
@@ -114,6 +121,29 @@ export async function createPatient(
     }
     return { success: false, message: "Failed to create patient", errors: {} };
   } catch (e: any) {
+    if (e?.response) {
+      try {
+        const body = await e.response.json();
+        if (body.error === "DUPLICATE_PATIENT" && body.patient) {
+          return {
+            success: false,
+            message: "DUPLICATE_PATIENT",
+            duplicatePatient: body.patient,
+          };
+        }
+        return {
+          success: false,
+          message: body?.message ?? body?.error ?? "Request failed",
+          errors: {},
+        };
+      } catch {
+        return {
+          success: false,
+          message: `Request failed with status ${e.response.status}`,
+          errors: {},
+        };
+      }
+    }
     const errorMessage = await extractApiError(e);
     return {
       success: false,
