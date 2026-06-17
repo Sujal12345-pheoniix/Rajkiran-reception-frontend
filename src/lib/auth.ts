@@ -21,7 +21,7 @@ const ACCESS_TOKEN_OPTIONS = {
   secure: true, // Always secure in production / cross-site cookies
   sameSite: "none" as const, // Cross-site cookie support for Vercel + Render
   path: "/",
-  maxAge: 10 * 60 * 60, // 10 hours in seconds
+  maxAge: 24 * 60 * 60, // 24 hours in seconds
 };
 
 const REFRESH_TOKEN_OPTIONS = {
@@ -29,7 +29,7 @@ const REFRESH_TOKEN_OPTIONS = {
   secure: true,
   sameSite: "none" as const,
   path: "/",
-  maxAge: 30 * 24 * 60 * 60, // 30 days in seconds
+  maxAge: 180 * 24 * 60 * 60, // 180 days in seconds
 };
 
 // ─── Cookie Token Parser ──────────────────────────────────────────────────────
