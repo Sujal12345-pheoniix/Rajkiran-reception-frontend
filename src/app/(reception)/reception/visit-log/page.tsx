@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
+import Link from "next/link";
 import { Footer } from "@/components/Footer";
 import { Header } from "@/components/Header";
 import { getVisitsRequest, getPatientRequest } from "@/lib/api-client";
@@ -77,7 +78,17 @@ export default function VisitLogPage() {
         // Load all visits for the hospital-grade visit log
         const res = await getVisitsRequest({ limit: 1000 }, token);
         if (res.success && res.data) {
-          setVisits(res.data as VisitLogData[]);
+          const allVisits = res.data as VisitLogData[];
+          // Filter to keep only the latest visit of each patient (as they are sorted descending)
+          const seenPatients = new Set<string>();
+          const uniqueLatestVisits = allVisits.filter((v) => {
+            if (seenPatients.has(v.patient.unique_id)) {
+              return false;
+            }
+            seenPatients.add(v.patient.unique_id);
+            return true;
+          });
+          setVisits(uniqueLatestVisits);
         }
       } catch (err) {
         console.error("Failed to load visits:", err);
@@ -294,10 +305,18 @@ export default function VisitLogPage() {
                 <div className="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center font-black text-blue-400 text-lg">
                   {selectedVisit.patient.first_name[0]}{selectedVisit.patient.last_name[0]}
                 </div>
-                <div>
-                  <h3 className="font-bold text-white text-base">
-                    {selectedVisit.patient.first_name} {selectedVisit.patient.last_name}
-                  </h3>
+                <div className="flex-1">
+                  <div className="flex justify-between items-center w-full">
+                    <h3 className="font-bold text-white text-base">
+                      {selectedVisit.patient.first_name} {selectedVisit.patient.last_name}
+                    </h3>
+                    <Link
+                      href={`/reception/patient-profile/${selectedVisit.patient.unique_id}`}
+                      className="px-3 py-1 bg-blue-650 hover:bg-blue-700 text-white rounded text-[11px] font-bold transition-colors ml-4 print:hidden"
+                    >
+                      Complete Profile
+                    </Link>
+                  </div>
                   <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400 mt-1">
                     <span>UHID: <strong className="text-slate-200">{selectedVisit.patient.unique_id}</strong></span>
                     <span>Mobile: <strong className="text-slate-200">{selectedVisit.patient.mobile}</strong></span>
