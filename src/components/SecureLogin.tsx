@@ -9,6 +9,7 @@ import {
   Monitor,
   Shield,
   ShieldCheck,
+  RefreshCw,
 } from "lucide-react";
 import Image from "next/image";
 import { useEffect, useState, type ComponentType, type SVGProps } from "react";
@@ -52,8 +53,31 @@ function RajkiranLogo({
 export function SecureLogin() {
   const [state, action, loading] = useActionState(login, undefined);
   const router = useRouter();
-  // BUG FIX: Added showPassword state — Eye button previously had no state toggle
   const [showPassword, setShowPassword] = useState(false);
+  const [isWakingUp, setIsWakingUp] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const warmUp = async () => {
+      const timer = setTimeout(() => {
+        if (active) setIsWakingUp(true);
+      }, 1200);
+
+      try {
+        const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+        await fetch(`${apiBase}/health`, { mode: "cors" });
+      } catch (err) {
+        console.warn("Health warm-up failed:", err);
+      } finally {
+        clearTimeout(timer);
+        if (active) setIsWakingUp(false);
+      }
+    };
+    warmUp();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   useEffect(() => {
     if (state?.success) router.push("/reception");
@@ -113,6 +137,16 @@ export function SecureLogin() {
               <div className="bg-red-50 border border-red-200 rounded-lg p-3 flex items-center gap-2">
                 <Shield className="w-4 h-4 text-red-500 flex-shrink-0" />
                 <p className="text-red-600 text-sm">{state.error}</p>
+              </div>
+            )}
+
+            {/* Server warming up state */}
+            {isWakingUp && (
+              <div className="bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center gap-2 text-amber-800 animate-pulse">
+                <RefreshCw className="w-4 h-4 animate-spin text-amber-600 flex-shrink-0" />
+                <p className="text-xs font-semibold">
+                  Waking up database server. Cold starts can take up to 40 seconds. Please wait...
+                </p>
               </div>
             )}
 

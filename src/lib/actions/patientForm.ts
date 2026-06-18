@@ -46,6 +46,8 @@ export async function createPatient(
     email: (formData.get("email") as string)?.trim() || undefined,
     address: (formData.get("address") as string)?.trim() || undefined,
     alternateNumber: (formData.get("alternateNumber") as string)?.trim() || undefined,
+    bloodGroup: (formData.get("bloodGroup") as string) || undefined,
+    chronicConditions: formData.get("chronicConditions") ? JSON.parse(formData.get("chronicConditions") as string) : []
   };
 
   // Client-side validation
@@ -109,6 +111,8 @@ export async function createPatient(
         email: rawData.email || undefined,
         address: rawData.address || undefined,
         alternate_mobile: rawData.alternateNumber || undefined,
+        blood_group: rawData.bloodGroup,
+        chronic_conditions: rawData.chronicConditions
       },
       accessToken,
     );

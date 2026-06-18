@@ -131,7 +131,7 @@ export default function PatientProfilePage({
   const otherAllergies = patient.patient_allergies?.filter((a: any) => a.allergy?.category === "other") || [];
 
   // Chronic conditions
-  const chronicConditions = patient.patient_chronic_conditions || [];
+  const chronicConditions = patient.chronic_conditions || [];
 
   return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col justify-between print:bg-white print:text-black">
@@ -142,7 +142,7 @@ export default function PatientProfilePage({
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4 print:hidden">
           <div className="flex items-center gap-3">
             <Link
-              href="/reception/visit-book"
+              href="/reception/visit-log"
               className="p-2 bg-white border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors shadow-sm"
             >
               <ArrowLeft className="w-4 h-4" />
@@ -232,8 +232,8 @@ export default function PatientProfilePage({
                     {medicineAllergies.map((a: any, idx: number) => (
                       <li key={idx}><strong>Drug Allergy:</strong> Allergy to {a.allergy?.allergy_name} ({a.specific_note || "Severe reaction"})</li>
                     ))}
-                    {chronicConditions.map((c: any, idx: number) => (
-                      <li key={idx}><strong>Chronic Condition:</strong> Diagnosed with {c.condition?.condition_name} ({c.other_specific_note || "Active"})</li>
+                    {chronicConditions.map((c: string, idx: number) => (
+                      <li key={idx}><strong>Chronic Condition:</strong> Diagnosed with {c}</li>
                     ))}
                   </ul>
                 </div>

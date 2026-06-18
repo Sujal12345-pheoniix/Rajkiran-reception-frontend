@@ -25,11 +25,38 @@ import {
   Printer,
   Download,
   Filter,
-  ArrowRight
+  ArrowRight,
+  Trash2,
+  Edit,
+  Key,
+  Database,
+  UserPlus,
+  RefreshCw
 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { logout } from "@/lib/auth";
-import { getAuditLogsRequest, getBillsReportRequest } from "@/lib/api-client";
+import {
+  getAuditLogsRequest,
+  getBillsReportRequest,
+  backupDatabaseRequest,
+  restoreDatabaseRequest,
+  getUsersRequest,
+  createUserRequest,
+  updateUserRequest,
+  resetUserPasswordRequest,
+  createDoctorRequest,
+  updateDoctorRequest,
+  deleteDoctorRequest,
+  createDepartmentRequest,
+  updateDepartmentRequest,
+  deleteDepartmentRequest,
+  deletePatientRequest,
+  getPatientImpactRequest,
+  updatePatientRequest,
+  updateVisitRequest,
+  deleteVisitRequest,
+  getDepartmentsRequest
+} from "@/lib/api-client";
 import { getAccessToken } from "@/lib/auth";
 
 interface DashboardViewProps {
@@ -105,6 +132,36 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
   const [viewingPatientData, setViewingPatientData] = useState<any>(null);
   const [loadingPatientData, setLoadingPatientData] = useState(false);
 
+  // User Management State
+  const [usersList, setUsersList] = useState<any[]>([]);
+  const [loadingUsers, setLoadingUsers] = useState(false);
+  const [newUsername, setNewUsername] = useState("");
+  const [newUserPassword, setNewUserPassword] = useState("");
+  const [newUserRole, setNewUserRole] = useState("receptionist");
+  const [selectedResetUser, setSelectedResetUser] = useState<any | null>(null);
+  const [resetPasswordVal, setResetPasswordVal] = useState("");
+
+  // Doctor & Department States
+  const [doctorsRegistry, setDoctorsRegistry] = useState<any[]>(initialData.doctorsList);
+  const [departmentsRegistry, setDepartmentsRegistry] = useState<any[]>([]);
+  const [loadingDepartments, setLoadingDepartments] = useState(false);
+
+  // Doctor form modals
+  const [selectedDoctor, setSelectedDoctor] = useState<any | null>(null);
+  const [docForm, setDocForm] = useState({ first_name: "", last_name: "", email: "", mobile: "", specialization: "", qualification: "", consultation_fee: 500, department_id: "", status: "active" });
+  const [showDocModal, setShowDocModal] = useState(false);
+
+  // Department form modals
+  const [selectedDept, setSelectedDept] = useState<any | null>(null);
+  const [deptForm, setDeptForm] = useState({ name: "", description: "", status: "active" });
+  const [showDeptModal, setShowDeptModal] = useState(false);
+
+  // Delete Patient Modal States
+  const [deletingPatient, setDeletingPatient] = useState<any | null>(null);
+  const [deleteImpact, setDeleteImpact] = useState<any | null>(null);
+  const [loadingImpact, setLoadingImpact] = useState(false);
+  const [permanentDelete, setPermanentDelete] = useState(false);
+
   const metrics = initialData.metrics;
   const trends = initialData.trends || {
     dailyTrends: [
@@ -134,38 +191,77 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
   };
 
   useEffect(() => {
-    if (activeTab === "logs") {
-      async function loadLogs() {
-        setLoadingLogs(true);
-        try {
-          const token = await getAccessToken();
-          if (token) {
-            const res = await getAuditLogsRequest(token);
-            if (res.success && res.data) setAuditLogs(res.data);
-          }
-        } catch (e) {
-          console.error(e);
-        } finally {
-          setLoadingLogs(false);
+    async function loadLogs() {
+      setLoadingLogs(true);
+      try {
+        const token = await getAccessToken();
+        if (token) {
+          const res = await getAuditLogsRequest(token);
+          if (res.success && res.data) setAuditLogs(res.data);
         }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingLogs(false);
       }
+    }
+
+    async function loadBills() {
+      setLoadingBills(true);
+      try {
+        const token = await getAccessToken();
+        if (token) {
+          const res = await getBillsReportRequest(token);
+          if (res.success && res.data) setBillsReport(res.data);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingBills(false);
+      }
+    }
+
+    async function loadUsers() {
+      setLoadingUsers(true);
+      try {
+        const token = await getAccessToken();
+        if (token) {
+          const res = await getUsersRequest(1, 100, token);
+          if (res.success && res.data) setUsersList(res.data);
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingUsers(false);
+      }
+    }
+
+    async function loadDepartments() {
+      setLoadingDepartments(true);
+      try {
+        const token = await getAccessToken();
+        if (token) {
+          const res = await getDepartmentsRequest(token);
+          if (res.success && res.data) {
+            setDepartmentsRegistry(res.data);
+          }
+        }
+      } catch (e) {
+        console.error(e);
+      } finally {
+        setLoadingDepartments(false);
+      }
+    }
+
+    if (activeTab === "logs") {
       loadLogs();
     } else if (activeTab === "billing") {
-      async function loadBills() {
-        setLoadingBills(true);
-        try {
-          const token = await getAccessToken();
-          if (token) {
-            const res = await getBillsReportRequest(token);
-            if (res.success && res.data) setBillsReport(res.data);
-          }
-        } catch (e) {
-          console.error(e);
-        } finally {
-          setLoadingBills(false);
-        }
-      }
       loadBills();
+    } else if (activeTab === "admin-controls") {
+      loadUsers();
+      loadDepartments();
+    } else if (activeTab === "departments") {
+      loadDepartments();
     }
   }, [activeTab]);
 
@@ -199,7 +295,8 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
     { id: "beds", label: "Ward & Bed Management", icon: Activity },
     { id: "billing", label: "Revenue & Billing", icon: DollarSign },
     { id: "inventory", label: "Inventory & Meds", icon: Package },
-    { id: "logs", label: "System Audit Logs", icon: Shield },
+    { id: "admin-controls", label: "Admin Operations", icon: Shield },
+    { id: "logs", label: "System Audit Logs", icon: Clock },
   ];
 
   // Filters
@@ -232,6 +329,218 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
     a.setAttribute("href", url);
     a.setAttribute("download", filename);
     a.click();
+  };
+
+  // 1. Backup DB Handler
+  const handleBackup = async () => {
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      const res = await backupDatabaseRequest(token);
+      if (res.success && res.data) {
+        const blob = new Blob([JSON.stringify(res.data, null, 2)], { type: "application/json" });
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement("a");
+        a.href = url;
+        a.download = `rajkiran-db-backup-${new Date().toISOString().slice(0, 10)}.json`;
+        a.click();
+      }
+    } catch (e) {
+      alert("Backup failed. Please try again.");
+    }
+  };
+
+  // 2. Restore DB Handler
+  const handleRestore = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const reader = new FileReader();
+    reader.onload = async (event) => {
+      try {
+        const raw = event.target?.result as string;
+        const parsed = JSON.parse(raw);
+        const token = await getAccessToken();
+        if (!token) return;
+        const res = await restoreDatabaseRequest(parsed, token);
+        if (res.success) {
+          alert("Database restored successfully!");
+          window.location.reload();
+        }
+      } catch (err) {
+        alert("Failed to restore database. Invalid backup file format.");
+      }
+    };
+    reader.readAsText(file);
+  };
+
+  // 3. User Activation & Role updates
+  const handleUserStatusChange = async (userId: string, active: boolean) => {
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      await updateUserRequest(userId, { is_active: active }, token);
+      setUsersList(prev => prev.map(u => u.user_id === userId ? { ...u, is_active: active } : u));
+    } catch (err) {
+      alert("Failed to update user status.");
+    }
+  };
+
+  const handleUserRoleChange = async (userId: string, role: string) => {
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      await updateUserRequest(userId, { role }, token);
+      setUsersList(prev => prev.map(u => u.user_id === userId ? { ...u, role } : u));
+    } catch (err) {
+      alert("Failed to update user role.");
+    }
+  };
+
+  // 4. Reset Password handler
+  const handlePasswordReset = async () => {
+    if (!selectedResetUser || !resetPasswordVal.trim()) return;
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      await resetUserPasswordRequest(selectedResetUser.user_id, { password: resetPasswordVal.trim() }, token);
+      alert("Password reset successfully!");
+      setSelectedResetUser(null);
+      setResetPasswordVal("");
+    } catch (err) {
+      alert("Failed to reset password.");
+    }
+  };
+
+  // 5. Add User Handler
+  const handleAddUser = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!newUsername.trim() || !newUserPassword.trim()) return;
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      const res = await createUserRequest({ username: newUsername.trim(), password: newUserPassword.trim(), role: newUserRole }, token);
+      if (res.success) {
+        alert("User created successfully!");
+        setNewUsername("");
+        setNewUserPassword("");
+        // Refresh users list
+        const refreshed = await getUsersRequest(1, 100, token);
+        if (refreshed.success && refreshed.data) setUsersList(refreshed.data);
+      }
+    } catch (err) {
+      alert("Failed to create user. Username may already exist.");
+    }
+  };
+
+  // 6. Doctor Management Handlers
+  const handleDoctorSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      if (selectedDoctor) {
+        const res = await updateDoctorRequest(selectedDoctor.doctor_id, docForm, token);
+        if (res.success) {
+          alert("Doctor details updated!");
+          setDoctorsRegistry(prev => prev.map(d => d.doctor_id === selectedDoctor.doctor_id ? res.data : d));
+        }
+      } else {
+        const res = await createDoctorRequest(docForm, token);
+        if (res.success) {
+          alert("New doctor registered!");
+          setDoctorsRegistry(prev => [...prev, res.data]);
+        }
+      }
+      setShowDocModal(false);
+      setSelectedDoctor(null);
+    } catch (err) {
+      alert("Failed to save doctor details.");
+    }
+  };
+
+  const handleDeleteDoctor = async (docId: string, permanent: boolean) => {
+    if (!confirm("Are you sure you want to remove this doctor?")) return;
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      await deleteDoctorRequest(docId, permanent, token);
+      setDoctorsRegistry(prev => prev.filter(d => d.doctor_id !== docId));
+      alert("Doctor removed successfully.");
+    } catch (err) {
+      alert("Failed to delete doctor.");
+    }
+  };
+
+  // 7. Department Management Handlers
+  const handleDeptSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      if (selectedDept) {
+        const res = await updateDepartmentRequest(selectedDept.department_id, deptForm, token);
+        if (res.success) {
+          alert("Department updated successfully!");
+          setDepartmentsRegistry(prev => prev.map(d => d.department_id === selectedDept.department_id ? res.data : d));
+        }
+      } else {
+        const res = await createDepartmentRequest(deptForm, token);
+        if (res.success) {
+          alert("Department created successfully!");
+          setDepartmentsRegistry(prev => [...prev, res.data]);
+        }
+      }
+      setShowDeptModal(false);
+      setSelectedDept(null);
+    } catch (err) {
+      alert("Failed to save department details.");
+    }
+  };
+
+  const handleDeleteDept = async (deptId: string, permanent: boolean) => {
+    if (!confirm("Are you sure you want to delete this department?")) return;
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      await deleteDepartmentRequest(deptId, permanent, token);
+      setDepartmentsRegistry(prev => prev.filter(d => d.department_id !== deptId));
+      alert("Department deleted.");
+    } catch (err) {
+      alert("Failed to delete department.");
+    }
+  };
+
+  // 8. Patient Deletion Handler
+  const handleInitiateDeletePatient = async (patient: any) => {
+    setDeletingPatient(patient);
+    setLoadingImpact(true);
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      const res = await getPatientImpactRequest(patient.unique_id, token);
+      if (res.success) {
+        setDeleteImpact(res.data);
+      }
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setLoadingImpact(false);
+    }
+  };
+
+  const handleConfirmDeletePatient = async () => {
+    if (!deletingPatient) return;
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      await deletePatientRequest(deletingPatient.unique_id, permanentDelete, token);
+      alert(permanentDelete ? "Patient permanently deleted." : "Patient soft deleted.");
+      setDeletingPatient(null);
+      setDeleteImpact(null);
+      window.location.reload();
+    } catch (err) {
+      alert("Failed to delete patient.");
+    }
   };
 
   return (
@@ -920,8 +1229,583 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
             </div>
           )}
 
+          {/* TAB 9: ADMIN CONTROLS OPERATIONS CENTER */}
+          {activeTab === "admin-controls" && (
+            <div className="space-y-6 animate-fadeIn">
+              {/* Row 1: Backup & Restore */}
+              <div className="bg-white p-6 rounded-xl border border-slate-200 shadow-sm grid grid-cols-1 md:grid-cols-2 gap-6 items-center">
+                <div>
+                  <h3 className="text-base font-bold text-slate-900 flex items-center gap-2">
+                    <Database size={18} className="text-teal-600" /> Database Backup & Recovery
+                  </h3>
+                  <p className="text-xs text-slate-500 mt-1">
+                    Download full database table dumps in JSON format or restore the database schema records.
+                  </p>
+                </div>
+                <div className="flex flex-wrap gap-3 md:justify-end">
+                  <button
+                    onClick={handleBackup}
+                    className="px-4 py-2 bg-slate-900 hover:bg-slate-800 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition"
+                  >
+                    <Download size={14} /> Download Backup JSON
+                  </button>
+                  <label className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg text-xs font-semibold flex items-center gap-1.5 transition cursor-pointer">
+                    <RefreshCw size={14} /> Upload & Restore DB
+                    <input
+                      type="file"
+                      accept=".json"
+                      onChange={handleRestore}
+                      className="hidden"
+                    />
+                  </label>
+                </div>
+              </div>
+
+              {/* Row 2: User management & Register User */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+                {/* Users List */}
+                <div className="lg:col-span-2 bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden flex flex-col justify-between">
+                  <div className="px-5 py-4 border-b border-slate-200">
+                    <h3 className="font-bold text-slate-900 text-sm">Active Staff Accounts</h3>
+                  </div>
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left text-xs">
+                      <thead>
+                        <tr className="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold border-b border-slate-200">
+                          <th className="px-5 py-3">Username</th>
+                          <th className="px-5 py-3">Role</th>
+                          <th className="px-5 py-3">Status</th>
+                          <th className="px-5 py-3 text-right">Actions</th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-slate-100">
+                        {loadingUsers ? (
+                          <tr>
+                            <td colSpan={4} className="text-center py-6 text-slate-400">Loading accounts...</td>
+                          </tr>
+                        ) : usersList.map(u => (
+                          <tr key={u.user_id} className="hover:bg-slate-50/50">
+                            <td className="px-5 py-3 font-semibold text-slate-800">{u.username}</td>
+                            <td className="px-5 py-3 uppercase font-mono text-[10px] text-slate-500">{u.role}</td>
+                            <td className="px-5 py-3">
+                              <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                                u.is_active ? "bg-green-50 text-green-700 border border-green-150" : "bg-red-50 text-red-700 border border-red-150"
+                              }`}>{u.is_active ? "active" : "inactive"}</span>
+                            </td>
+                            <td className="px-5 py-3 text-right space-x-1.5">
+                              <button
+                                onClick={() => setSelectedResetUser(u)}
+                                className="px-2 py-1 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded text-[10px] font-semibold transition"
+                              >
+                                Reset Pass
+                              </button>
+                              {u.is_active ? (
+                                <button
+                                  onClick={() => handleUserStatusChange(u.user_id, false)}
+                                  className="px-2 py-1 bg-red-50 hover:bg-red-100 text-red-600 rounded text-[10px] font-semibold transition"
+                                >
+                                  Deactivate
+                                </button>
+                              ) : (
+                                <button
+                                  onClick={() => handleUserStatusChange(u.user_id, true)}
+                                  className="px-2 py-1 bg-green-50 hover:bg-green-100 text-green-600 rounded text-[10px] font-semibold transition"
+                                >
+                                  Activate
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                </div>
+
+                {/* Add User Form */}
+                <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                  <h3 className="font-bold text-slate-900 text-sm flex items-center gap-1.5">
+                    <UserPlus size={16} className="text-teal-600" /> Register New Account
+                  </h3>
+                  <form onSubmit={handleAddUser} className="space-y-3.5 text-xs">
+                    <div>
+                      <label className="block text-slate-600 font-medium mb-1">Username</label>
+                      <input
+                        type="text"
+                        value={newUsername}
+                        onChange={(e) => setNewUsername(e.target.value)}
+                        placeholder="Enter username"
+                        required
+                        className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-600 font-medium mb-1">Password</label>
+                      <input
+                        type="password"
+                        value={newUserPassword}
+                        onChange={(e) => setNewUserPassword(e.target.value)}
+                        placeholder="Min 6 characters"
+                        required
+                        className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="block text-slate-600 font-medium mb-1">Access Role</label>
+                      <select
+                        value={newUserRole}
+                        onChange={(e) => setNewUserRole(e.target.value)}
+                        className="w-full p-2 bg-white border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                      >
+                        <option value="receptionist">Receptionist</option>
+                        <option value="admin">Administrator</option>
+                      </select>
+                    </div>
+                    <button
+                      type="submit"
+                      className="w-full py-2 bg-teal-600 hover:bg-teal-700 text-white rounded-lg font-bold transition"
+                    >
+                      Create User Account
+                    </button>
+                  </form>
+                </div>
+              </div>
+
+              {/* Row 3: Doctors registry CRUD */}
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+                  <h3 className="font-bold text-slate-900 text-sm">Doctors Registry Management</h3>
+                  <button
+                    onClick={() => {
+                      setSelectedDoctor(null);
+                      setDocForm({ first_name: "", last_name: "", email: "", mobile: "", specialization: "", qualification: "", consultation_fee: 500, department_id: departmentsRegistry[0]?.department_id || "", status: "active" });
+                      setShowDocModal(true);
+                    }}
+                    className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-lg transition"
+                  >
+                    Add New Doctor
+                  </button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-left text-xs">
+                    <thead>
+                      <tr className="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold border-b border-slate-200">
+                        <th className="px-6 py-3">Doctor</th>
+                        <th className="px-6 py-3">Department</th>
+                        <th className="px-6 py-3">Fee</th>
+                        <th className="px-6 py-3">Status</th>
+                        <th className="px-6 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {doctorsRegistry.map(d => (
+                        <tr key={d.doctor_id} className="hover:bg-slate-50/50">
+                          <td className="px-6 py-4 font-semibold text-slate-800">Dr. {d.first_name} {d.last_name} ({d.specialization})</td>
+                          <td className="px-6 py-4 text-slate-600">{d.department?.name || "N/A"}</td>
+                          <td className="px-6 py-4 font-bold text-slate-800">₹{Number(d.consultation_fee)}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                              d.status === "active" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+                            }`}>{d.status}</span>
+                          </td>
+                          <td className="px-6 py-4 text-right space-x-1.5">
+                            <button
+                              onClick={() => {
+                                setSelectedDoctor(d);
+                                setDocForm({ ...d });
+                                setShowDocModal(true);
+                              }}
+                              className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition"
+                              title="Edit Details"
+                            >
+                              <Edit size={12} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteDoctor(d.doctor_id, false)}
+                              className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition"
+                              title="Soft Delete"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Row 4: Department registry CRUD */}
+              <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
+                <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
+                  <h3 className="font-bold text-slate-900 text-sm">Department Registry Management</h3>
+                  <button
+                    onClick={() => {
+                      setSelectedDept(null);
+                      setDeptForm({ name: "", description: "", status: "active" });
+                      setShowDeptModal(true);
+                    }}
+                    className="px-3 py-1.5 bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold rounded-lg transition"
+                  >
+                    Create Department
+                  </button>
+                </div>
+                <div className="overflow-x-auto">
+                  <table className="w-full border-collapse text-left text-xs">
+                    <thead>
+                      <tr className="bg-slate-50 text-slate-500 uppercase tracking-wider font-bold border-b border-slate-200">
+                        <th className="px-6 py-3">Department Name</th>
+                        <th className="px-6 py-3">Description</th>
+                        <th className="px-6 py-3">Status</th>
+                        <th className="px-6 py-3 text-right">Actions</th>
+                      </tr>
+                    </thead>
+                    <tbody className="divide-y divide-slate-100">
+                      {departmentsRegistry.map(dept => (
+                        <tr key={dept.department_id} className="hover:bg-slate-50/50">
+                          <td className="px-6 py-4 font-semibold text-slate-800">{dept.name}</td>
+                          <td className="px-6 py-4 text-slate-500">{dept.description || "No description"}</td>
+                          <td className="px-6 py-4">
+                            <span className={`px-2 py-0.5 rounded-full text-[9px] font-bold ${
+                              dept.status === "active" ? "bg-green-50 text-green-700" : "bg-red-50 text-red-700"
+                            }`}>{dept.status}</span>
+                          </td>
+                          <td className="px-6 py-4 text-right space-x-1.5">
+                            <button
+                              onClick={() => {
+                                setSelectedDept(dept);
+                                setDeptForm({ name: dept.name, description: dept.description || "", status: dept.status as any });
+                                setShowDeptModal(true);
+                              }}
+                              className="p-1.5 bg-slate-100 hover:bg-slate-200 text-slate-700 rounded-lg transition"
+                              title="Edit"
+                            >
+                              <Edit size={12} />
+                            </button>
+                            <button
+                              onClick={() => handleDeleteDept(dept.department_id, false)}
+                              className="p-1.5 bg-red-50 hover:bg-red-100 text-red-600 rounded-lg transition"
+                              title="Delete"
+                            >
+                              <Trash2 size={12} />
+                            </button>
+                          </td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
+
+              {/* Row 5: Patient search and deletion */}
+              <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
+                <h3 className="font-bold text-slate-900 text-sm">Administrative Patient Deletion</h3>
+                <p className="text-xs text-slate-500">
+                  Search patients by name or ID to initiate a soft delete or hard delete with full impact validation.
+                </p>
+                <div className="space-y-3">
+                  {filteredPatients.map(p => (
+                    <div key={p.patient_id} className="flex justify-between items-center bg-slate-50 p-3 rounded-lg border border-slate-100 text-xs">
+                      <div>
+                        <span className="font-bold text-slate-800">{p.first_name} {p.last_name}</span>
+                        <span className="block text-[10px] text-slate-400 font-mono mt-0.5">{p.unique_id} • {p.mobile}</span>
+                      </div>
+                      <button
+                        onClick={() => handleInitiateDeletePatient(p)}
+                        className="px-3 py-1.5 bg-rose-50 hover:bg-rose-100 text-rose-600 rounded-lg font-bold transition"
+                      >
+                        Delete Patient Record
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            </div>
+          )}
+
         </main>
       </div>
+
+      {/* OVERLAY MODAL: PASSWORD RESET */}
+      {selectedResetUser && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-sm w-full p-6 space-y-4 shadow-xl border border-slate-100 text-slate-800">
+            <h3 className="font-black text-lg text-slate-900 flex items-center gap-1.5">
+              <Key size={18} className="text-teal-600" /> Reset Password
+            </h3>
+            <p className="text-xs text-slate-500">
+              Enter a new secure password for account: <strong>{selectedResetUser.username}</strong>
+            </p>
+            <input
+              type="password"
+              placeholder="Minimum 6 characters"
+              value={resetPasswordVal}
+              onChange={(e) => setResetPasswordVal(e.target.value)}
+              className="w-full p-2.5 border rounded-lg text-sm focus:outline-none focus:ring-1 focus:ring-teal-500"
+            />
+            <div className="flex gap-2 justify-end pt-2 text-xs">
+              <button
+                onClick={() => { setSelectedResetUser(null); setResetPasswordVal(""); }}
+                className="px-4 py-2 border rounded-lg font-semibold hover:bg-slate-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handlePasswordReset}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg transition"
+              >
+                Reset Account Password
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* OVERLAY MODAL: DOCTOR REGISTRATION FORM */}
+      {showDocModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <form onSubmit={handleDoctorSubmit} className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-xl border border-slate-100 text-slate-850 text-xs">
+            <h3 className="font-black text-lg text-slate-900">
+              {selectedDoctor ? "Edit Doctor Details" : "Register New Specialist Doctor"}
+            </h3>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">First Name</label>
+                <input
+                  type="text"
+                  required
+                  value={docForm.first_name}
+                  onChange={(e) => setDocForm(prev => ({ ...prev, first_name: e.target.value }))}
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Last Name</label>
+                <input
+                  type="text"
+                  required
+                  value={docForm.last_name}
+                  onChange={(e) => setDocForm(prev => ({ ...prev, last_name: e.target.value }))}
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Specialization</label>
+                <input
+                  type="text"
+                  required
+                  value={docForm.specialization}
+                  onChange={(e) => setDocForm(prev => ({ ...prev, specialization: e.target.value }))}
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Qualification</label>
+                <input
+                  type="text"
+                  required
+                  value={docForm.qualification}
+                  onChange={(e) => setDocForm(prev => ({ ...prev, qualification: e.target.value }))}
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                />
+              </div>
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Email</label>
+              <input
+                type="email"
+                required
+                value={docForm.email}
+                onChange={(e) => setDocForm(prev => ({ ...prev, email: e.target.value }))}
+                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 font-mono"
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Mobile Contact</label>
+                <input
+                  type="tel"
+                  required
+                  value={docForm.mobile}
+                  onChange={(e) => setDocForm(prev => ({ ...prev, mobile: e.target.value }))}
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Consultation Fee (INR)</label>
+                <input
+                  type="number"
+                  required
+                  value={docForm.consultation_fee}
+                  onChange={(e) => setDocForm(prev => ({ ...prev, consultation_fee: parseInt(e.target.value) }))}
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                />
+              </div>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Department</label>
+                <select
+                  value={docForm.department_id}
+                  onChange={(e) => setDocForm(prev => ({ ...prev, department_id: e.target.value }))}
+                  className="w-full p-2 bg-white border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                >
+                  <option value="">Select Department</option>
+                  {departmentsRegistry.map(d => (
+                    <option key={d.department_id} value={d.department_id}>{d.name}</option>
+                  ))}
+                </select>
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Status</label>
+                <select
+                  value={docForm.status}
+                  onChange={(e) => setDocForm(prev => ({ ...prev, status: e.target.value }))}
+                  className="w-full p-2 bg-white border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                >
+                  <option value="active">Active</option>
+                  <option value="inactive">Inactive</option>
+                  <option value="on_leave">On Leave</option>
+                </select>
+              </div>
+            </div>
+            <div className="flex gap-2 justify-end pt-3 text-xs">
+              <button
+                type="button"
+                onClick={() => { setShowDocModal(false); setSelectedDoctor(null); }}
+                className="px-4 py-2 border rounded-lg font-semibold hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg"
+              >
+                Save Doctor Profile
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* OVERLAY MODAL: DEPARTMENT CREATE/EDIT */}
+      {showDeptModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <form onSubmit={handleDeptSubmit} className="bg-white rounded-xl max-w-sm w-full p-6 space-y-4 shadow-xl border border-slate-100 text-slate-800 text-xs">
+            <h3 className="font-black text-lg text-slate-900">
+              {selectedDept ? "Edit Department" : "Create Clinical Department"}
+            </h3>
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Department Name</label>
+              <input
+                type="text"
+                required
+                value={deptForm.name}
+                onChange={(e) => setDeptForm(prev => ({ ...prev, name: e.target.value }))}
+                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Description</label>
+              <textarea
+                value={deptForm.description}
+                onChange={(e) => setDeptForm(prev => ({ ...prev, description: e.target.value }))}
+                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                rows={3}
+              />
+            </div>
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Status</label>
+              <select
+                value={deptForm.status}
+                onChange={(e) => setDeptForm(prev => ({ ...prev, status: e.target.value as any }))}
+                className="w-full p-2 bg-white border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+              >
+                <option value="active">Active</option>
+                <option value="inactive">Inactive</option>
+              </select>
+            </div>
+            <div className="flex gap-2 justify-end pt-3 text-xs">
+              <button
+                type="button"
+                onClick={() => { setShowDeptModal(false); setSelectedDept(null); }}
+                className="px-4 py-2 border rounded-lg font-semibold hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg"
+              >
+                Save Department
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
+
+      {/* OVERLAY MODAL: CONFIRM DELETE PATIENT WITH IMPACT SUMMARY */}
+      {deletingPatient && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <div className="bg-white rounded-xl max-w-md w-full p-6 space-y-4 shadow-xl border border-slate-100 text-slate-800">
+            <h3 className="font-black text-lg text-slate-900 flex items-center gap-1.5">
+              <AlertCircle size={20} className="text-rose-600" /> Confirm Patient Deletion
+            </h3>
+            <div className="bg-rose-50 border border-rose-200 rounded-lg p-3 text-xs text-rose-800 space-y-1">
+              <p>Warning: Deleting patient records cannot be undone. Please verify target details.</p>
+              <p className="font-bold">Target: {deletingPatient.first_name} {deletingPatient.last_name} ({deletingPatient.unique_id})</p>
+            </div>
+
+            {loadingImpact ? (
+              <div className="py-4 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+                <RefreshCw size={14} className="animate-spin" /> Verifying related visits impact...
+              </div>
+            ) : deleteImpact ? (
+              <div className="text-xs space-y-2">
+                <p className="font-semibold text-slate-700">Delete Impact Summary:</p>
+                <ul className="list-disc pl-5 text-slate-500 space-y-1">
+                  <li>Total Visits to remove: <strong>{deleteImpact.visitsCount} visits</strong></li>
+                  <li>All vitals and bills attached to this record will be cleared.</li>
+                </ul>
+              </div>
+            ) : null}
+
+            <div className="space-y-2 pt-2 text-xs">
+              <label className="flex items-center gap-2 font-semibold text-slate-700 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={permanentDelete}
+                  onChange={(e) => setPermanentDelete(e.target.checked)}
+                  className="rounded border-slate-350 focus:ring-teal-500 h-4 w-4"
+                />
+                Permanently purge data from database (Hard Delete)
+              </label>
+              <p className="text-[10px] text-slate-400 pl-6">
+                Unchecked performs a soft delete, preserving records in archive but removing from all activeReception queues.
+              </p>
+            </div>
+
+            <div className="flex gap-2 justify-end pt-3 text-xs">
+              <button
+                onClick={() => { setDeletingPatient(null); setDeleteImpact(null); setPermanentDelete(false); }}
+                className="px-4 py-2 border rounded-lg font-semibold hover:bg-slate-50 transition"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleConfirmDeletePatient}
+                className="px-4 py-2 bg-rose-600 hover:bg-rose-700 text-white font-bold rounded-lg transition"
+              >
+                Execute Record Deletion
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* OVERLAY MODAL: GENERAL BILL VIEWER IN REVERE */}
     </div>
   );
 }

@@ -26,11 +26,11 @@ const actions = [
     path: "/reception/renew-visit",
   },
   {
-    title: "Visit Book",
+    title: "Visit Log",
     description: "Filter and find existing visits.",
     icon: CalendarDays,
     tone: "primarySoft",
-    path: "/reception/visit-book",
+    path: "/reception/visit-log",
   },
 ];
 

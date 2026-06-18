@@ -1,0 +1,461 @@
+"use client";
+
+import { useState, useEffect, useMemo } from "react";
+import { Footer } from "@/components/Footer";
+import { Header } from "@/components/Header";
+import { getVisitsRequest, getPatientRequest } from "@/lib/api-client";
+import { getAccessToken } from "@/lib/auth";
+import {
+  Calendar,
+  Clock,
+  User,
+  Stethoscope,
+  Activity,
+  FileText,
+  DollarSign,
+  Monitor,
+  CheckCircle,
+  X,
+  Search,
+  ChevronRight,
+  TrendingUp,
+  HeartPulse,
+  RefreshCw
+} from "lucide-react";
+
+type VisitLogData = {
+  visit_id: string;
+  visit_type: string;
+  visit_date: string;
+  symptoms: string[];
+  known_diseases: string[];
+  chief_complaint: string | null;
+  visit_notes: string | null;
+  created_by: string;
+  created_by_user?: { username: string };
+  patient: {
+    first_name: string;
+    last_name: string;
+    unique_id: string;
+    mobile: string;
+  };
+  doctor: {
+    first_name: string;
+    last_name: string;
+    specialization: string;
+    department?: { name: string };
+  } | null;
+  vitals: {
+    blood_pressure: string | null;
+    heart_rate: number | null;
+    temperature: number | null;
+    weight: number | null;
+    height: number | null;
+    bmi: number | null;
+    oxygen_saturation: number | null;
+  } | null;
+  bill: {
+    total_amount: number;
+    payment_status: string;
+    payment_method: string | null;
+  };
+};
+
+export default function VisitLogPage() {
+  const [visits, setVisits] = useState<VisitLogData[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [selectedVisit, setSelectedVisit] = useState<VisitLogData | null>(null);
+  const [patientHistory, setPatientHistory] = useState<any[]>([]);
+  const [loadingHistory, setLoadingHistory] = useState(false);
+
+  useEffect(() => {
+    async function loadVisits() {
+      try {
+        const token = await getAccessToken();
+        if (!token) return;
+        // Load all visits for the hospital-grade visit log
+        const res = await getVisitsRequest({ limit: 1000 }, token);
+        if (res.success && res.data) {
+          setVisits(res.data as VisitLogData[]);
+        }
+      } catch (err) {
+        console.error("Failed to load visits:", err);
+      } finally {
+        setLoading(false);
+      }
+    }
+    loadVisits();
+  }, []);
+
+  // Fetch patient profile history when a visit details modal is opened
+  useEffect(() => {
+    if (selectedVisit) {
+      setLoadingHistory(true);
+      async function loadPatientHistory() {
+        try {
+          if (!selectedVisit) return;
+          const token = await getAccessToken();
+          if (!token) return;
+          const res = await getPatientRequest(selectedVisit.patient.unique_id, token);
+          if (res.success && res.data) {
+            setPatientHistory((res.data as any).visits || []);
+          }
+        } catch (err) {
+          console.error("Failed to fetch patient history:", err);
+        } finally {
+          setLoadingHistory(false);
+        }
+      }
+      loadPatientHistory();
+    }
+  }, [selectedVisit]);
+
+  const filteredVisits = useMemo(() => {
+    const q = searchQuery.toLowerCase().trim();
+    if (!q) return visits;
+    return visits.filter(
+      (v) =>
+        `${v.patient.first_name} ${v.patient.last_name}`.toLowerCase().includes(q) ||
+        v.patient.unique_id.toLowerCase().includes(q) ||
+        v.patient.mobile.includes(q) ||
+        (v.doctor && `${v.doctor.first_name} ${v.doctor.last_name}`.toLowerCase().includes(q))
+    );
+  }, [visits, searchQuery]);
+
+  return (
+    <div className="flex min-h-screen flex-col bg-slate-900 font-body-md text-slate-100">
+      <Header activeItem="Visit Book" />
+
+      <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 md:px-16">
+        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
+          <div>
+            <h1 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
+              <HeartPulse className="text-blue-500 w-8 h-8" />
+              Rajkiran Visit Log
+            </h1>
+            <p className="text-slate-400 text-sm mt-1">Complete historic index of all patient encounters.</p>
+          </div>
+          <div className="w-full md:w-80 relative">
+            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+            <input
+              type="text"
+              placeholder="Search by name, ID or mobile..."
+              value={searchQuery}
+              onChange={(e) => setSearchQuery(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+            />
+          </div>
+        </div>
+
+        {loading ? (
+          <div className="flex-1 flex items-center justify-center py-20">
+            <RefreshCw className="w-8 h-8 animate-spin text-blue-500" />
+          </div>
+        ) : filteredVisits.length > 0 ? (
+          <div className="border border-slate-800 rounded-xl overflow-hidden bg-slate-950 shadow-xl">
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs border-collapse">
+                <thead>
+                  <tr className="bg-slate-900 border-b border-slate-800 text-slate-400 uppercase font-semibold tracking-wider">
+                    <th className="py-4 px-5">Visit Date / ID</th>
+                    <th className="py-4 px-5">Patient Details</th>
+                    <th className="py-4 px-5">Consulting Specialist</th>
+                    <th className="py-4 px-5">Diagnosis & Symptoms</th>
+                    <th className="py-4 px-5">Key Vitals</th>
+                    <th className="py-4 px-5">Billing & Status</th>
+                    <th className="py-4 px-5 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-slate-800">
+                  {filteredVisits.map((v) => {
+                    const dateStr = new Date(v.visit_date).toLocaleDateString("en-IN", {
+                      day: "2-digit",
+                      month: "short",
+                      year: "numeric"
+                    });
+                    const timeStr = new Date(v.visit_date).toLocaleTimeString("en-IN", {
+                      hour: "2-digit",
+                      minute: "2-digit"
+                    });
+                    return (
+                      <tr key={v.visit_id} className="hover:bg-slate-900/50 transition-colors">
+                        <td className="py-4 px-5">
+                          <button
+                            onClick={() => setSelectedVisit(v)}
+                            className="font-bold text-blue-400 hover:text-blue-300 hover:underline block text-left text-sm"
+                          >
+                            {dateStr}
+                          </button>
+                          <span className="text-slate-500 text-[10px] block font-mono mt-0.5">{timeStr} ({v.visit_id.slice(0, 8)})</span>
+                        </td>
+                        <td className="py-4 px-5">
+                          <span className="font-semibold text-slate-200 block text-sm">
+                            {v.patient.first_name} {v.patient.last_name}
+                          </span>
+                          <span className="text-slate-400 text-xs block mt-0.5">UHID: {v.patient.unique_id}</span>
+                        </td>
+                        <td className="py-4 px-5">
+                          <span className="font-medium text-slate-300 block text-sm">
+                            {v.doctor ? `Dr. ${v.doctor.first_name} ${v.doctor.last_name}` : "General Duty"}
+                          </span>
+                          <span className="text-slate-500 text-xs block mt-0.5">
+                            {v.doctor?.specialization ?? "OPD Clinic"} ({v.doctor?.department?.name ?? "General Medicine"})
+                          </span>
+                        </td>
+                        <td className="py-4 px-5">
+                          <span className="text-slate-300 font-medium block max-w-xs truncate text-xs">
+                            {v.chief_complaint || "Routine Checkup"}
+                          </span>
+                          <div className="flex flex-wrap gap-1 mt-1">
+                            {v.symptoms.slice(0, 3).map((sym) => (
+                              <span key={sym} className="px-1.5 py-0.5 rounded bg-slate-900 text-slate-400 text-[10px]">
+                                {sym}
+                              </span>
+                            ))}
+                            {v.symptoms.length > 3 && (
+                              <span className="text-slate-500 text-[10px] pl-1 font-semibold">+{v.symptoms.length - 3} more</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="py-4 px-5">
+                          {v.vitals ? (
+                            <div className="space-y-0.5 text-slate-300 font-mono text-[11px]">
+                              <div>BP: <span className="text-slate-200 font-bold">{v.vitals.blood_pressure || "N/A"}</span></div>
+                              <div>HR: <span className="text-slate-200 font-bold">{v.vitals.heart_rate ? `${v.vitals.heart_rate} bpm` : "N/A"}</span></div>
+                              <div>BMI: <span className="text-slate-200 font-bold">{v.vitals.bmi || "N/A"}</span></div>
+                            </div>
+                          ) : (
+                            <span className="text-slate-500 italic">Not recorded</span>
+                          )}
+                        </td>
+                        <td className="py-4 px-5">
+                          <span className="font-bold text-slate-100 block text-sm">
+                            ₹{Number(v.bill.total_amount).toLocaleString("en-IN")}
+                          </span>
+                          <span className={`inline-block px-2 py-0.5 rounded-full text-[10px] font-bold mt-1 uppercase ${
+                            v.bill.payment_status === "paid"
+                              ? "bg-green-500/10 text-green-400 border border-green-500/20"
+                              : "bg-amber-500/10 text-amber-400 border border-amber-500/20"
+                          }`}>
+                            {v.bill.payment_status}
+                          </span>
+                        </td>
+                        <td className="py-4 px-5 text-right">
+                          <button
+                            onClick={() => setSelectedVisit(v)}
+                            className="bg-slate-800 hover:bg-blue-600 text-white font-semibold py-1.5 px-3 rounded-lg text-xs transition-colors"
+                          >
+                            Details
+                          </button>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        ) : (
+          <div className="flex-1 flex flex-col items-center justify-center py-20 border border-slate-800 bg-slate-950 rounded-xl">
+            <p className="text-slate-500">No visits found matching criteria.</p>
+          </div>
+        )}
+      </main>
+
+      {/* Visit Details Overlay Drawer / Modal */}
+      {selectedVisit && (
+        <div className="fixed inset-0 z-50 bg-black/60 backdrop-blur-xs flex justify-end">
+          <div className="w-full max-w-2xl bg-slate-950 border-l border-slate-800 h-full overflow-y-auto p-6 md:p-8 flex flex-col justify-between shadow-2xl relative text-slate-100 animate-slideOver">
+            <button
+              onClick={() => setSelectedVisit(null)}
+              className="absolute top-6 right-6 text-slate-400 hover:text-white transition"
+              aria-label="Close details"
+            >
+              <X size={24} />
+            </button>
+
+            <div className="space-y-6">
+              {/* Header */}
+              <div>
+                <span className="text-blue-500 text-xs font-bold uppercase tracking-wider">Clinical Case Sheet</span>
+                <h2 className="text-2xl font-black text-white mt-1">
+                  Visit Details — {new Date(selectedVisit.visit_date).toLocaleDateString("en-IN", {
+                    day: "2-digit",
+                    month: "long",
+                    year: "numeric"
+                  })}
+                </h2>
+                <p className="text-slate-400 text-xs mt-0.5">Visit ID: {selectedVisit.visit_id}</p>
+              </div>
+
+              {/* Patient Profile Card */}
+              <div className="bg-slate-900 border border-slate-850 rounded-xl p-4 flex gap-4 items-center">
+                <div className="w-12 h-12 rounded-full bg-blue-500/10 border border-blue-500/20 flex items-center justify-center font-black text-blue-400 text-lg">
+                  {selectedVisit.patient.first_name[0]}{selectedVisit.patient.last_name[0]}
+                </div>
+                <div>
+                  <h3 className="font-bold text-white text-base">
+                    {selectedVisit.patient.first_name} {selectedVisit.patient.last_name}
+                  </h3>
+                  <div className="flex flex-wrap gap-x-4 gap-y-1 text-xs text-slate-400 mt-1">
+                    <span>UHID: <strong className="text-slate-200">{selectedVisit.patient.unique_id}</strong></span>
+                    <span>Mobile: <strong className="text-slate-200">{selectedVisit.patient.mobile}</strong></span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Medical and Vitals Information */}
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="bg-slate-900 border border-slate-850 rounded-xl p-4 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-800 pb-2 flex items-center gap-1.5">
+                    <Activity size={14} className="text-blue-400" /> Patient Vitals
+                  </h4>
+                  {selectedVisit.vitals ? (
+                    <div className="grid grid-cols-2 gap-y-2 gap-x-4 text-xs font-mono">
+                      <div>BP: <strong className="text-white block mt-0.5 text-sm">{selectedVisit.vitals.blood_pressure || "N/A"}</strong></div>
+                      <div>Pulse: <strong className="text-white block mt-0.5 text-sm">{selectedVisit.vitals.heart_rate ? `${selectedVisit.vitals.heart_rate} bpm` : "N/A"}</strong></div>
+                      <div>Temp: <strong className="text-white block mt-0.5 text-sm">{selectedVisit.vitals.temperature ? `${selectedVisit.vitals.temperature} °C` : "N/A"}</strong></div>
+                      <div>Weight: <strong className="text-white block mt-0.5 text-sm">{selectedVisit.vitals.weight ? `${selectedVisit.vitals.weight} kg` : "N/A"}</strong></div>
+                      <div>Height: <strong className="text-white block mt-0.5 text-sm">{selectedVisit.vitals.height ? `${selectedVisit.vitals.height} cm` : "N/A"}</strong></div>
+                      <div>BMI: <strong className="text-white block mt-0.5 text-sm">{selectedVisit.vitals.bmi || "N/A"}</strong></div>
+                    </div>
+                  ) : (
+                    <p className="text-xs text-slate-500 italic">No vitals were captured for this visit.</p>
+                  )}
+                </div>
+
+                <div className="bg-slate-900 border border-slate-850 rounded-xl p-4 space-y-3">
+                  <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-800 pb-2 flex items-center gap-1.5">
+                    <Stethoscope size={14} className="text-blue-400" /> Consulting Specialist
+                  </h4>
+                  <div className="text-xs space-y-1">
+                    <p className="font-bold text-white text-sm">
+                      {selectedVisit.doctor ? `Dr. ${selectedVisit.doctor.first_name} ${selectedVisit.doctor.last_name}` : "General Duty Staff"}
+                    </p>
+                    <p className="text-slate-400">{selectedVisit.doctor?.specialization ?? "General OPD Services"}</p>
+                    <p className="text-slate-500">Dept: {selectedVisit.doctor?.department?.name ?? "General Outpatient Clinic"}</p>
+                  </div>
+                </div>
+              </div>
+
+              {/* Chief Complaint, Symptoms, Diseases */}
+              <div className="bg-slate-900 border border-slate-850 rounded-xl p-5 space-y-4">
+                <div>
+                  <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Chief Complaint</span>
+                  <p className="text-sm font-medium text-white bg-slate-950 p-3 rounded-lg border border-slate-800">
+                    {selectedVisit.chief_complaint || "Routine consult / general wellness checks."}
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-2 gap-4">
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Presenting Symptoms</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedVisit.symptoms.map((s) => (
+                        <span key={s} className="px-2 py-0.5 rounded bg-slate-950 border border-slate-850 text-slate-300 text-xs">
+                          {s}
+                        </span>
+                      ))}
+                      {selectedVisit.symptoms.length === 0 && <span className="text-xs italic text-slate-550">None specified</span>}
+                    </div>
+                  </div>
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Associated Diseases</span>
+                    <div className="flex flex-wrap gap-1.5">
+                      {selectedVisit.known_diseases.map((d) => (
+                        <span key={d} className="px-2 py-0.5 rounded bg-slate-950 border border-slate-850 text-slate-300 text-xs">
+                          {d}
+                        </span>
+                      ))}
+                      {selectedVisit.known_diseases.length === 0 && <span className="text-xs italic text-slate-550">None specified</span>}
+                    </div>
+                  </div>
+                </div>
+
+                {selectedVisit.visit_notes && (
+                  <div>
+                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Clinical Notes</span>
+                    <p className="text-xs text-slate-300 bg-slate-950 p-3 rounded-lg border border-slate-800 whitespace-pre-line">
+                      {selectedVisit.visit_notes}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Billing and Invoicing */}
+              <div className="bg-slate-900 border border-slate-850 rounded-xl p-5 space-y-3">
+                <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-800 pb-2 flex items-center gap-1.5">
+                  <DollarSign size={14} className="text-blue-400" /> Invoice Breakdown
+                </h4>
+                <div className="flex justify-between items-center text-xs text-slate-300">
+                  <span>Grand Total Bill Invoice</span>
+                  <span className="text-base font-black text-white">₹{Number(selectedVisit.bill.total_amount).toLocaleString("en-IN")}</span>
+                </div>
+                <div className="flex justify-between items-center text-xs text-slate-400 mt-2">
+                  <span>Payment status: <strong className="text-white uppercase">{selectedVisit.bill.payment_status}</strong></span>
+                  <span>Payment method: <strong className="text-white uppercase">{selectedVisit.bill.payment_method || "Cash"}</strong></span>
+                </div>
+              </div>
+
+              {/* Patient's Complete Medical Timeline */}
+              <div className="bg-slate-900 border border-slate-850 rounded-xl p-5 space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-widest text-slate-400 border-b border-slate-800 pb-2 flex items-center gap-1.5">
+                  <Calendar size={14} className="text-blue-400" /> Patient Medical Timeline
+                </h4>
+                {loadingHistory ? (
+                  <div className="py-6 text-center text-xs text-slate-400 flex items-center justify-center gap-2">
+                    <RefreshCw size={14} className="animate-spin text-blue-500" /> Loading historical visits...
+                  </div>
+                ) : patientHistory.length > 0 ? (
+                  <div className="relative border-l border-slate-800 pl-4 space-y-4 ml-2">
+                    {patientHistory.map((h, i) => {
+                      const hDate = new Date(h.visit_date).toLocaleDateString("en-IN", {
+                        day: "2-digit",
+                        month: "short",
+                        year: "numeric"
+                      });
+                      return (
+                        <div key={h.visit_id} className="relative text-xs">
+                          {/* Dot indicator */}
+                          <div className={`absolute -left-[21px] top-1.5 w-2.5 h-2.5 rounded-full border-2 ${
+                            h.visit_id === selectedVisit.visit_id
+                              ? "bg-blue-500 border-blue-500 ring-4 ring-blue-500/10"
+                              : "bg-slate-950 border-slate-700"
+                          }`} />
+                          <div className="flex justify-between">
+                            <span className={`font-bold ${h.visit_id === selectedVisit.visit_id ? "text-blue-400" : "text-white"}`}>
+                              {hDate}
+                            </span>
+                            <span className="text-slate-500">{h.visit_type}</span>
+                          </div>
+                          <p className="text-slate-400 mt-0.5">
+                            {h.doctor ? `Dr. ${h.doctor.first_name} ${h.doctor.last_name}` : "General Outpatient Check"}
+                          </p>
+                          {h.chief_complaint && <p className="text-slate-500 italic mt-0.5">"{h.chief_complaint}"</p>}
+                        </div>
+                      );
+                    })}
+                  </div>
+                ) : (
+                  <p className="text-xs text-slate-500 italic">No previous visit records found.</p>
+                )}
+              </div>
+            </div>
+
+            <div className="pt-6 border-t border-slate-800 mt-6 flex justify-end">
+              <button
+                onClick={() => setSelectedVisit(null)}
+                className="px-5 py-2.5 bg-slate-800 hover:bg-slate-750 text-white rounded-lg text-xs font-bold transition-colors"
+              >
+                Close Drawer
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      <Footer />
+    </div>
+  );
+}

@@ -17,7 +17,7 @@ const defaultNavigation: NavigationItem[] = [
   { label: "Home", href: "/reception" },
   { label: "New Patient", href: "/reception/new-patient" },
   { label: "Renew Visit", href: "/reception/renew-visit" },
-  { label: "Visit Book", href: "/reception/visit-book" },
+  { label: "Visit Log", href: "/reception/visit-log" },
 ];
 
 export function Header({

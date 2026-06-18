@@ -1,7 +1,7 @@
 "use client";
 
-import { useActionState } from "react";
-import { User, Lock, LogIn, AlertCircle } from "lucide-react";
+import { useActionState, useEffect, useState } from "react";
+import { User, Lock, LogIn, AlertCircle, RefreshCw } from "lucide-react";
 import { loginAction, type LoginState } from "@/lib/actions/adminAuth";
 import Image from "next/image";
 import Link from "next/link";
@@ -11,6 +11,30 @@ export default function LoginForm() {
     loginAction,
     null,
   );
+  const [isWakingUp, setIsWakingUp] = useState(false);
+
+  useEffect(() => {
+    let active = true;
+    const warmUp = async () => {
+      const timer = setTimeout(() => {
+        if (active) setIsWakingUp(true);
+      }, 1200);
+
+      try {
+        const apiBase = process.env.NEXT_PUBLIC_API_URL ?? "http://localhost:3001/api";
+        await fetch(`${apiBase}/health`, { mode: "cors" });
+      } catch (err) {
+        console.warn("Health warm-up failed:", err);
+      } finally {
+        clearTimeout(timer);
+        if (active) setIsWakingUp(false);
+      }
+    };
+    warmUp();
+    return () => {
+      active = false;
+    };
+  }, []);
 
   return (
     <div className="flex flex-col items-center justify-center min-h-screen gap-10 bg-gray-100 w-full">
@@ -36,6 +60,16 @@ export default function LoginForm() {
             <div className="mb-4 flex items-center gap-2 rounded-lg bg-red-50 p-3 text-sm text-red-700">
               <AlertCircle className="h-4 w-4 shrink-0" />
               <span>{state.error}</span>
+            </div>
+          )}
+
+          {/* Server warming up state */}
+          {isWakingUp && (
+            <div className="mb-4 bg-amber-50 border border-amber-200 rounded-lg p-3 flex items-center gap-2 text-amber-800 animate-pulse">
+              <RefreshCw className="h-4 w-4 animate-spin text-amber-600 flex-shrink-0" />
+              <p className="text-xs font-semibold">
+                Waking up database server. Cold starts can take up to 40 seconds. Please wait...
+              </p>
             </div>
           )}
 
