@@ -87,6 +87,9 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
   const [extraCharge, setExtraCharge] = useState(0);
   const [discount, setDiscount] = useState(0);
   const [paymentStatus, setPaymentStatus] = useState("paid");
+  const [customCharges, setCustomCharges] = useState<{ id: string; name: string; value: number }[]>([]);
+  const [customChargeName, setCustomChargeName] = useState("");
+  const [customChargeValue, setCustomChargeValue] = useState("");
   const [paymentMethod, setPaymentMethod] = useState("cash");
 
   // Fetch patient profile & previous history
@@ -215,7 +218,8 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
   }, [selectedSymptoms]);
 
   // Total Billing calculation
-  const subtotal = consultationFee + registrationFee + testsFee + medicinesFee + extraCharge;
+  const customChargesTotal = customCharges.reduce((sum, c) => sum + c.value, 0);
+  const subtotal = consultationFee + registrationFee + testsFee + medicinesFee + extraCharge + customChargesTotal;
   const tax = parseFloat((subtotal * 0.05).toFixed(2)); // 5% GST tax
   const grandTotal = parseFloat((subtotal + tax - discount).toFixed(2));
 
@@ -248,6 +252,7 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
       { name: "Diagnostic Tests Fee", value: testsFee },
       { name: "Pharmacy Medicines Fee", value: medicinesFee },
       { name: "Emergency / Extra Service Fee", value: extraCharge },
+      ...customCharges.map(c => ({ name: c.name, value: c.value }))
     ].filter(item => item.value > 0);
 
     return (
@@ -356,6 +361,10 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
       <input type="hidden" name="knownDiseases" value={selectedKnownDiseases.join(",")} />
       <input type="hidden" name="consultationFee" value={consultationFee} />
       <input type="hidden" name="registrationFee" value={registrationFee} />
+      <input type="hidden" name="testsFee" value={testsFee} />
+      <input type="hidden" name="medicinesFee" value={medicinesFee} />
+      <input type="hidden" name="extraCharge" value={extraCharge + customChargesTotal} />
+      <input type="hidden" name="discount" value={discount} />
       <input type="hidden" name="tax" value={tax} />
       <input type="hidden" name="grandTotal" value={grandTotal} />
       <input type="hidden" name="paymentMethod" value={paymentMethod} />
@@ -674,6 +683,59 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
                   className="w-20 text-right font-semibold border-b border-slate-200 py-0.5 focus:outline-none"
                 />
               </div>
+
+              {/* Custom Charges List */}
+              {customCharges.map((cc) => (
+                <div key={cc.id} className="flex justify-between items-center text-slate-700">
+                  <span className="font-medium flex items-center gap-1.5">
+                    {cc.name}
+                    <button
+                      type="button"
+                      onClick={() => setCustomCharges(prev => prev.filter(c => c.id !== cc.id))}
+                      className="text-rose-500 hover:text-rose-700 font-bold"
+                    >
+                      ×
+                    </button>
+                  </span>
+                  <span className="font-semibold text-right">₹{cc.value}</span>
+                </div>
+              ))}
+
+              {/* Add Custom Charge Inline Section */}
+              <div className="border-t border-dashed border-slate-100 pt-2.5 space-y-2">
+                <p className="text-[10px] text-slate-400 font-bold uppercase tracking-wider">Add Additional Charge Item</p>
+                <div className="flex gap-2">
+                  <input
+                    type="text"
+                    placeholder="e.g. Suture Fee"
+                    value={customChargeName}
+                    onChange={(e) => setCustomChargeName(e.target.value)}
+                    className="flex-1 p-1 bg-slate-50 border border-slate-200 rounded text-[11px] focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <input
+                    type="number"
+                    placeholder="Amount"
+                    value={customChargeValue}
+                    onChange={(e) => setCustomChargeValue(e.target.value)}
+                    className="w-16 p-1 bg-slate-50 border border-slate-200 rounded text-right text-[11px] font-semibold focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const val = parseFloat(customChargeValue);
+                      if (customChargeName.trim() && !isNaN(val) && val > 0) {
+                        setCustomCharges(prev => [...prev, { id: Math.random().toString(), name: customChargeName.trim(), value: val }]);
+                        setCustomChargeName("");
+                        setCustomChargeValue("");
+                      }
+                    }}
+                    className="px-2 py-1 bg-blue-600 hover:bg-blue-700 text-white rounded text-[10px] font-bold"
+                  >
+                    Add
+                  </button>
+                </div>
+              </div>
+
               <hr className="border-slate-100" />
               <div className="flex justify-between items-center text-slate-500">
                 <span>Tax (5% GST)</span>

@@ -113,8 +113,10 @@ export const adminLoginRequest = (data: {
   return api.post("auth/login", { json: data });
 };
 
-export const refreshRequest = (): Promise<KyResponse> => {
-  return api.post("auth/refresh");
+export const refreshRequest = (refreshToken?: string): Promise<KyResponse> => {
+  return api.post("auth/refresh", {
+    headers: refreshToken ? { Cookie: `refresh_token=${refreshToken}` } : undefined,
+  });
 };
 
 export const logoutRequest = (): Promise<KyResponse> => {

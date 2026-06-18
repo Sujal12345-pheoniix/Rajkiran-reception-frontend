@@ -107,7 +107,7 @@ export const verifySession = cache(async (): Promise<any | null> => {
   if (!refreshToken) return null;
 
   try {
-    const response = await refreshRequest();
+    const response = await refreshRequest(refreshToken);
     if (!response.ok) return null;
 
     const setCookies = response.headers.getSetCookie();
