@@ -370,10 +370,7 @@ export default function PatientProfilePage({
                         {visit.chief_complaint && (
                           <div className="mb-1"><strong>Complaint:</strong> {visit.chief_complaint}</div>
                         )}
-                        {visit.visit_notes && (
-                          <div><strong>Notes:</strong> {visit.visit_notes}</div>
-                        )}
-                        {!visit.chief_complaint && !visit.visit_notes && <span className="text-slate-400">N/A</span>}
+                        {!visit.chief_complaint && <span className="text-slate-400">N/A</span>}
                       </td>
                       <td className="px-6 py-4">
                         <div className="flex flex-wrap gap-1">

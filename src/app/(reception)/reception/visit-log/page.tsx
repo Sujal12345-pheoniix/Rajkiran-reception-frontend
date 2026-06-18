@@ -391,15 +391,6 @@ export default function VisitLogPage() {
                     </div>
                   </div>
                 </div>
-
-                {selectedVisit.visit_notes && (
-                  <div>
-                    <span className="text-[10px] font-bold uppercase tracking-widest text-slate-400 block mb-1">Clinical Notes</span>
-                    <p className="text-xs text-slate-300 bg-slate-950 p-3 rounded-lg border border-slate-800 whitespace-pre-line">
-                      {selectedVisit.visit_notes}
-                    </p>
-                  </div>
-                )}
               </div>
 
               {/* Billing and Invoicing */}
