@@ -79,6 +79,11 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
   const [selectedKnownDiseases, setSelectedKnownDiseases] = useState<string[]>([]);
 
+  // Custom chronic conditions states
+  const [customDiseases, setCustomDiseases] = useState<string[]>([]);
+  const [isOtherDiseasesSelected, setIsOtherDiseasesSelected] = useState(false);
+  const [otherDiseaseInput, setOtherDiseaseInput] = useState("");
+
   // Billing states
   const [consultationFee, setConsultationFee] = useState(0);
   const [registrationFee, setRegistrationFee] = useState(100);
@@ -122,7 +127,12 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
           // Preselect known chronic conditions
           const conditions = res.data.patient_chronic_conditions || [];
           if (conditions.length > 0) {
-            setSelectedKnownDiseases(conditions.map((c: any) => c.condition?.condition_name).filter(Boolean));
+            const list = conditions.map((c: any) => c.condition?.condition_name).filter(Boolean);
+            setSelectedKnownDiseases(list);
+            const custom = list.filter((name: string) => !KNOWN_DISEASES_LIST.includes(name));
+            if (custom.length > 0) {
+              setCustomDiseases(custom);
+            }
           }
         }
       } catch (e) {
@@ -579,8 +589,8 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
           </section>
 
           {/* Section 3: Known chronic conditions */}
-          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
-            <h3 className="font-bold text-slate-900 text-sm mb-4 flex items-center gap-2">
+          <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
+            <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">3</span>
               Known Chronic Diseases Check
             </h3>
@@ -602,14 +612,87 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
                   </button>
                 );
               })}
+              {customDiseases.map((disease) => {
+                const isSelected = selectedKnownDiseases.includes(disease);
+                return (
+                  <button
+                    type="button"
+                    key={disease}
+                    onClick={() => handleToggleDisease(disease)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
+                      isSelected
+                        ? "bg-rose-50 border-rose-200 text-rose-700 shadow-sm shadow-rose-200/20"
+                        : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    {disease}
+                  </button>
+                );
+              })}
+              <button
+                type="button"
+                onClick={() => setIsOtherDiseasesSelected(!isOtherDiseasesSelected)}
+                className={`px-3 py-1.5 rounded-lg text-xs font-semibold border transition ${
+                  isOtherDiseasesSelected
+                    ? "bg-blue-50 border-blue-200 text-blue-700 shadow-sm"
+                    : "bg-white border-slate-200 text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                Other
+              </button>
             </div>
+
+            {isOtherDiseasesSelected && (
+              <div className="flex gap-2 items-center bg-slate-50 p-3 rounded-lg border border-slate-100 mt-2">
+                <input
+                  type="text"
+                  placeholder="Type chronic illness name..."
+                  value={otherDiseaseInput}
+                  onChange={(e) => setOtherDiseaseInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      const val = otherDiseaseInput.trim();
+                      if (val) {
+                        if (!customDiseases.includes(val) && !KNOWN_DISEASES_LIST.includes(val)) {
+                          setCustomDiseases(prev => [...prev, val]);
+                        }
+                        if (!selectedKnownDiseases.includes(val)) {
+                          setSelectedKnownDiseases(prev => [...prev, val]);
+                        }
+                        setOtherDiseaseInput("");
+                      }
+                    }
+                  }}
+                  className="flex-1 text-xs px-3 py-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-blue-500 bg-white"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const val = otherDiseaseInput.trim();
+                    if (val) {
+                      if (!customDiseases.includes(val) && !KNOWN_DISEASES_LIST.includes(val)) {
+                        setCustomDiseases(prev => [...prev, val]);
+                      }
+                      if (!selectedKnownDiseases.includes(val)) {
+                        setSelectedKnownDiseases(prev => [...prev, val]);
+                      }
+                      setOtherDiseaseInput("");
+                    }
+                  }}
+                  className="px-3 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-lg text-xs font-bold"
+                >
+                  Add
+                </button>
+              </div>
+            )}
           </section>
 
-          {/* Section 4: Complaints & Notes */}
+          {/* Section 4: Complaints */}
           <section className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
             <h3 className="font-bold text-slate-900 text-sm flex items-center gap-2">
               <span className="w-5 h-5 rounded-full bg-blue-600 text-white flex items-center justify-center text-[10px] font-bold">4</span>
-              Chief Complaints & Registrar Notes
+              Chief Complaints
             </h3>
             <div>
               <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Chief Complaint</label>
@@ -617,15 +700,6 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
                 name="chiefComplaint"
                 rows={3}
                 placeholder="Enter patient primary symptoms complaints details..."
-                className="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 focus:outline-none bg-slate-50/50"
-              />
-            </div>
-            <div>
-              <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Visit / Consultation Notes</label>
-              <textarea
-                name="visitNotes"
-                rows={3}
-                placeholder="Enter doctor clinical advisory notes or internal reception comments..."
                 className="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 focus:outline-none bg-slate-50/50"
               />
             </div>

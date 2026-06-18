@@ -36,11 +36,6 @@ export default function PatientForm() {
   const [liveDuplicate, setLiveDuplicate] = useState<any | null>(null);
   const [checkingDuplicate, setCheckingDuplicate] = useState(false);
 
-  // State for chronic conditions
-  const [selectedConditions, setSelectedConditions] = useState<string[]>([]);
-  const [isOtherSelected, setIsOtherSelected] = useState(false);
-  const [otherCondition, setOtherCondition] = useState("");
-
   useEffect(() => {
     if (state.success && state.message) {
       router.push(`/reception/${state.message}`);
@@ -78,27 +73,13 @@ export default function PatientForm() {
     }
   }, [mobile]);
 
-  const handleConditionChange = (cond: string) => {
-    if (selectedConditions.includes(cond)) {
-      setSelectedConditions(prev => prev.filter(c => c !== cond));
-    } else {
-      setSelectedConditions(prev => [...prev, cond]);
-    }
-  };
-
-  // Compile final chronic conditions list before form submit
-  const finalConditions = [
-    ...selectedConditions,
-    ...(isOtherSelected && otherCondition.trim() ? [otherCondition.trim()] : [])
-  ];
-
   return (
     <form
       action={formAction}
       className="max-w-4xl mx-auto p-6 space-y-6"
       noValidate
     >
-      <input type="hidden" name="chronicConditions" value={JSON.stringify(finalConditions)} />
+      <input type="hidden" name="chronicConditions" value={JSON.stringify([])} />
 
       <div className="flex items-center gap-3 mb-2">
         <h1 className="text-3xl font-bold text-gray-800">New Patient Registration</h1>
@@ -184,7 +165,6 @@ export default function PatientForm() {
       {/* Patient Profile Section */}
       <section className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-6">
         <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2 border-b pb-3">
-          <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">1</span>
           Patient Profile
         </h2>
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
@@ -334,56 +314,6 @@ export default function PatientForm() {
         </div>
       </section>
 
-      {/* Chronic Illnesses Section */}
-      <section className="border rounded-xl p-6 bg-gray-50 shadow-sm space-y-6">
-        <h2 className="text-lg font-semibold text-gray-700 flex items-center gap-2 border-b pb-3">
-          <span className="w-6 h-6 bg-blue-600 text-white rounded-full flex items-center justify-center text-xs font-bold">2</span>
-          Known Chronic Conditions
-        </h2>
-        <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-3">
-          {CHRONIC_CONDITIONS.map(cond => {
-            const isChecked = selectedConditions.includes(cond);
-            return (
-              <button
-                type="button"
-                key={cond}
-                onClick={() => handleConditionChange(cond)}
-                className={`p-3 rounded-lg border text-left text-xs font-semibold transition-all duration-150 ${
-                  isChecked
-                    ? "border-blue-600 bg-blue-50 text-blue-700 shadow-xs"
-                    : "border-gray-200 bg-white text-slate-600 hover:bg-gray-100"
-                }`}
-              >
-                {cond}
-              </button>
-            );
-          })}
-          <button
-            type="button"
-            onClick={() => setIsOtherSelected(!isOtherSelected)}
-            className={`p-3 rounded-lg border text-left text-xs font-semibold transition-all duration-150 ${
-              isOtherSelected
-                ? "border-blue-600 bg-blue-50 text-blue-700 shadow-xs"
-                : "border-gray-200 bg-white text-slate-600 hover:bg-gray-100"
-            }`}
-          >
-            Other
-          </button>
-        </div>
-
-        {isOtherSelected && (
-          <div className="space-y-2 mt-4 animate-fadeIn">
-            <label className="block text-sm font-medium text-gray-700">Specify Other Conditions</label>
-            <textarea
-              value={otherCondition}
-              onChange={(e) => setOtherCondition(e.target.value)}
-              placeholder="Specify chronic illnesses (comma separated)"
-              rows={2}
-              className="w-full p-3 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-300 bg-white text-sm"
-            />
-          </div>
-        )}
-      </section>
 
       <button
         type="submit"
