@@ -444,9 +444,10 @@ export default function PatientProfilePage({
           <Image
             src="/reference/logo.png"
             alt="Rajkiran Hospital Logo"
-            width={50}
-            height={50}
+            width={120}
+            height={81}
             className="mb-1"
+            priority
           />
           <h1 className="text-xl font-extrabold tracking-wide uppercase">RAJKIRAN SUPER-SPECIALITY HOSPITAL</h1>
           <p className="text-xs text-slate-500 font-mono mt-0.5">Contact: +91 98765 43210</p>
@@ -563,8 +564,8 @@ export default function PatientProfilePage({
               <Image 
                 src="/reference/logo.png" 
                 alt="Watermark Logo" 
-                width={280} 
-                height={280} 
+                width={350} 
+                height={238} 
                 priority 
               />
             </div>
