@@ -132,14 +132,34 @@ export default function PatientProfilePage({
 
   // Chronic conditions
   const chronicConditions = patient.chronic_conditions || [];
-
-  return (
+  return (
     <div className="min-h-screen bg-slate-50 font-sans text-slate-800 flex flex-col justify-between print:bg-white print:text-black">
-      <Header activeItem="Visit Book" />
+      {/* INJECTED PRINT STYLE TO ENSURE ONE PAGE */}
+      <style dangerouslySetInnerHTML={{ __html: `
+        @media print {
+          @page {
+            size: A4 portrait;
+            margin: 0 !important;
+          }
+          html, body {
+            height: 100vh;
+            max-height: 100vh;
+            overflow: hidden !important;
+            margin: 0 !important;
+            padding: 0 !important;
+            -webkit-print-color-adjust: exact;
+            print-color-adjust: exact;
+          }
+        }
+      `}} />
 
-      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8 md:px-8 space-y-8 print:p-0 print:my-0">
+      <div className="print:hidden">
+        <Header activeItem="Visit Book" />
+      </div>
+
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 py-8 md:px-8 space-y-8 print:hidden">
         {/* Top bar */}
-        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4 print:hidden">
+        <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center gap-4 border-b border-slate-200 pb-4">
           <div className="flex items-center gap-3">
             <Link
               href="/reception/visit-log"
@@ -162,24 +182,10 @@ export default function PatientProfilePage({
           </div>
         </div>
 
-        {/* PRINT HEADER */}
-        <div className="hidden print:block border-b-2 border-slate-900 pb-6 mb-6">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">RAJKIRAN SUPER-SPECIALITY HOSPITAL</h1>
-              <p className="text-sm text-slate-600">Patna, Bihar, India | Contact: +91 98765 43210</p>
-            </div>
-            <div className="text-right">
-              <h2 className="text-xl font-bold text-slate-800">COMPLETE EHR REPORT</h2>
-              <p className="text-xs text-slate-500">Generated on: {new Date().toLocaleString()}</p>
-            </div>
-          </div>
-        </div>
-
         {/* Grid 1: Basic Info & KPI widgets */}
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Card: Profile Details */}
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4 print:border-none print:shadow-none print:p-0">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 space-y-4">
             <div className="flex items-center gap-4">
               <div className="w-16 h-16 bg-blue-50 text-blue-600 font-bold text-xl rounded-full flex items-center justify-center border border-blue-100">
                 {patient.first_name.slice(0, 1)}{patient.last_name.slice(0, 1)}
@@ -264,7 +270,7 @@ export default function PatientProfilePage({
 
         {/* Clinical History Trends Graphs */}
         {vitalsTrend.length > 0 && (
-          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6 print:break-inside-avoid">
+          <div className="bg-white rounded-xl border border-slate-200 shadow-sm p-6">
             <h3 className="font-bold text-slate-950 text-sm mb-4 flex items-center gap-2">
               <Activity className="text-blue-600 w-4 h-4" /> Vitals History & Trends Chart
             </h3>
@@ -333,7 +339,7 @@ export default function PatientProfilePage({
         )}
 
         {/* Detailed Medical / Visit History Table */}
-        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden print:break-inside-avoid">
+        <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
           <div className="px-5 py-4 border-b border-slate-200">
             <h3 className="font-bold text-slate-900 text-sm">Full Medical & Visit History Timeline</h3>
           </div>
@@ -412,7 +418,103 @@ export default function PatientProfilePage({
           </div>
         </div>
       </main>
-      <Footer />
+
+      <div className="print:hidden">
+        <Footer />
+      </div>
+
+      {/* PRINT-ONLY MEDICAL REPORT TEMPLATE */}
+      <div 
+        className="hidden print:flex print:flex-col print:w-full print:bg-white print:text-black font-sans relative p-8" 
+        style={{ 
+          height: "277mm", 
+          maxHeight: "277mm",
+          boxSizing: "border-box", 
+          overflow: "hidden",
+          breakInside: "avoid",
+          pageBreakInside: "avoid"
+        }}
+      >
+        {/* sideline margin - vertical line */}
+        <div className="absolute top-[180px] bottom-[120px] left-[200px] w-[1.5px] bg-slate-400"></div>
+
+        {/* Hospital Name on Top-Centre */}
+        <div className="text-center border-b-2 border-slate-900 pb-3 mb-4">
+          <h1 className="text-2xl font-extrabold tracking-wide uppercase">RAJKIRAN SUPER-SPECIALITY HOSPITAL</h1>
+          <p className="text-xs text-slate-500 font-mono mt-1">Patna, Bihar, India | Contact: +91 98765 43210</p>
+        </div>
+
+        {/* Patient Name / info bar at top */}
+        <div className="grid grid-cols-3 gap-2 text-sm border-b border-slate-300 pb-2 mb-6 font-semibold">
+          <div>
+            <span className="text-slate-600 font-medium">Patient Name: </span>
+            <span className="font-bold uppercase text-slate-900">{patient.first_name} {patient.last_name}</span>
+          </div>
+          <div className="text-center">
+            <span className="text-slate-600 font-medium">Age / Gender: </span>
+            <span className="font-bold text-slate-900">{calculateAge(patient.dob)} Yrs / {patient.gender}</span>
+          </div>
+          <div className="text-right">
+            <span className="text-slate-600 font-medium">Date: </span>
+            <span className="font-bold text-slate-900">{new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "2-digit", year: "numeric" })}</span>
+          </div>
+        </div>
+
+        {/* Content Area */}
+        <div className="flex flex-1">
+          {/* Left Sidebar: Vitals */}
+          <div className="w-[170px] pr-4 pt-2 space-y-5">
+            {(() => {
+              const latestVisit = visits.find((v: any) => v.vitals);
+              const vitals = latestVisit?.vitals || {};
+              return (
+                <>
+                  <div className="border-b border-slate-200 pb-1">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">Weight</span>
+                    <span className="text-sm font-semibold text-slate-800">{vitals.weight ? `${vitals.weight} Kg` : "—"}</span>
+                  </div>
+                  <div className="border-b border-slate-200 pb-1">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">SpO2</span>
+                    <span className="text-sm font-semibold text-slate-800">{vitals.oxygen_saturation ? `${vitals.oxygen_saturation} %` : "—"}</span>
+                  </div>
+                  <div className="border-b border-slate-200 pb-1">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">Blood Pressure</span>
+                    <span className="text-sm font-semibold text-slate-800">{vitals.blood_pressure || "—"}</span>
+                  </div>
+                  <div className="border-b border-slate-200 pb-1">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">Pulse Rate</span>
+                    <span className="text-sm font-semibold text-slate-800">{vitals.heart_rate ? `${vitals.heart_rate} bpm` : "—"}</span>
+                  </div>
+                  <div className="border-b border-slate-200 pb-1">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">Temperature</span>
+                    <span className="text-sm font-semibold text-slate-800">{vitals.temperature ? `${vitals.temperature} °F` : "—"}</span>
+                  </div>
+                  <div className="border-b border-slate-200 pb-1">
+                    <span className="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">Blood Sugar</span>
+                    <span className="text-sm font-semibold text-slate-800">{vitals.blood_sugar ? `${vitals.blood_sugar} mg/dL` : "—"}</span>
+                  </div>
+                </>
+              );
+            })()}
+          </div>
+
+          {/* Right main area - completely blank */}
+          <div className="flex-1 pl-8">
+            {/* Blank space for doctor to write */}
+          </div>
+        </div>
+
+        {/* Doctor Signature at bottom */}
+        <div className="border-t border-slate-200 pt-3 mt-auto flex justify-between items-end">
+          <div className="text-[10px] text-slate-400 font-mono">
+            Generated via Rajkiran EHR System
+          </div>
+          <div className="text-right pb-2 pr-2">
+            <div className="w-48 border-b border-slate-400 mb-1"></div>
+            <div className="text-xs font-bold text-slate-700 uppercase tracking-wider">Doctor's Signature</div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 }
