@@ -420,6 +420,10 @@ export type VisitCreateData = {
     known_diseases?: string[];
     chief_complaint?: string;
     visit_notes?: string;
+    ipd_admission_date?: string | null;
+    ipd_discharge_date?: string | null;
+    ipd_stay_days?: number | null;
+    ipd_daily_expense?: number | null;
   };
   vital: {
     blood_pressure?: string;

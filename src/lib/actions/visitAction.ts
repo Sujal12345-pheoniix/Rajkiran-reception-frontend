@@ -19,6 +19,11 @@ export async function createVisit(
   const doctorId = formData.get("doctorId") as string;
   const assignmentType = (formData.get("assignmentType") as string) || "OPD";
 
+  const ipdAdmissionDate = formData.get("ipdAdmissionDate") as string;
+  const ipdDischargeDate = formData.get("ipdDischargeDate") as string;
+  const ipdStayDays = formData.get("ipdStayDays") as string;
+  const ipdDailyExpense = formData.get("ipdDailyExpense") as string;
+
   // Vitals
   const bloodPressure = formData.get("bloodPressure") as string;
   const heartRate = formData.get("heartRate") as string;
@@ -80,6 +85,10 @@ export async function createVisit(
       known_diseases: knownDiseases,
       chief_complaint: chiefComplaint || undefined,
       visit_notes: visitNotes || undefined,
+      ipd_admission_date: ipdAdmissionDate || undefined,
+      ipd_discharge_date: ipdDischargeDate || undefined,
+      ipd_stay_days: ipdStayDays ? parseInt(ipdStayDays) : undefined,
+      ipd_daily_expense: ipdDailyExpense ? parseFloat(ipdDailyExpense) : undefined,
     },
     vital: {
       blood_pressure: bloodPressure || undefined,
