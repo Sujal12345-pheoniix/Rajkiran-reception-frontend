@@ -70,34 +70,61 @@ export default function VisitLogPage() {
   const [patientHistory, setPatientHistory] = useState<any[]>([]);
   const [loadingHistory, setLoadingHistory] = useState(false);
 
+  // Today's date in YYYY-MM-DD
+  const getTodayDateString = () => {
+    const today = new Date();
+    const year = today.getFullYear();
+    const month = String(today.getMonth() + 1).padStart(2, "0");
+    const day = String(today.getDate()).padStart(2, "0");
+    return `${year}-${month}-${day}`;
+  };
+
+  const [selectedDate, setSelectedDate] = useState<string>(getTodayDateString());
+  const [filterPaymentStatus, setFilterPaymentStatus] = useState<string>("all");
+  const [filterVisitType, setFilterVisitType] = useState<string>("all");
+  const [showFilters, setShowFilters] = useState(false);
+  const [refreshing, setRefreshing] = useState(false);
+  const [visibleCount, setVisibleCount] = useState(7);
+
   useEffect(() => {
-    async function loadVisits() {
-      try {
-        const token = await getAccessToken();
-        if (!token) return;
-        // Load all visits for the hospital-grade visit log
-        const res = await getVisitsRequest({ limit: 1000 }, token);
-        if (res.success && res.data) {
-          const allVisits = res.data as VisitLogData[];
-          // Filter to keep only the latest visit of each patient (as they are sorted descending)
-          const seenPatients = new Set<string>();
-          const uniqueLatestVisits = allVisits.filter((v) => {
-            if (seenPatients.has(v.patient.unique_id)) {
-              return false;
-            }
-            seenPatients.add(v.patient.unique_id);
-            return true;
-          });
-          setVisits(uniqueLatestVisits);
-        }
-      } catch (err) {
-        console.error("Failed to load visits:", err);
-      } finally {
-        setLoading(false);
+    setVisibleCount(7);
+  }, [searchQuery, selectedDate, filterPaymentStatus, filterVisitType]);
+
+  const loadVisitsData = async (showMainSpinner = false) => {
+    if (showMainSpinner) setLoading(true);
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+      const res = await getVisitsRequest({ limit: 1000 }, token);
+      if (res.success && res.data) {
+        const allVisits = res.data as VisitLogData[];
+        // Filter to keep only the latest visit of each patient
+        const seenPatients = new Set<string>();
+        const uniqueLatestVisits = allVisits.filter((v) => {
+          if (seenPatients.has(v.patient.unique_id)) {
+            return false;
+          }
+          seenPatients.add(v.patient.unique_id);
+          return true;
+        });
+        setVisits(uniqueLatestVisits.slice(0, 100));
       }
+    } catch (err) {
+      console.error("Failed to load visits:", err);
+    } finally {
+      setLoading(false);
     }
-    loadVisits();
+  };
+
+  useEffect(() => {
+    loadVisitsData(true);
   }, []);
+
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    await loadVisitsData(false);
+    setRefreshing(false);
+  };
 
   // Fetch patient profile history when a visit details modal is opened
   useEffect(() => {
@@ -123,40 +150,150 @@ export default function VisitLogPage() {
   }, [selectedVisit]);
 
   const filteredVisits = useMemo(() => {
+    let result = visits;
+
+    // Filter by Date
+    if (selectedDate) {
+      result = result.filter((v) => {
+        const localDate = new Date(v.visit_date);
+        const year = localDate.getFullYear();
+        const month = String(localDate.getMonth() + 1).padStart(2, "0");
+        const day = String(localDate.getDate()).padStart(2, "0");
+        const formattedVisitDate = `${year}-${month}-${day}`;
+        return formattedVisitDate === selectedDate;
+      });
+    }
+
+    // Filter by Payment Status
+    if (filterPaymentStatus !== "all") {
+      result = result.filter((v) => v.bill.payment_status === filterPaymentStatus);
+    }
+
+    // Filter by Visit Type
+    if (filterVisitType !== "all") {
+      result = result.filter((v) => v.visit_type === filterVisitType);
+    }
+
+    // Filter by Search Query
     const q = searchQuery.toLowerCase().trim();
-    if (!q) return visits;
-    return visits.filter(
-      (v) =>
-        `${v.patient.first_name} ${v.patient.last_name}`.toLowerCase().includes(q) ||
-        v.patient.unique_id.toLowerCase().includes(q) ||
-        v.patient.mobile.includes(q) ||
-        (v.doctor && `${v.doctor.first_name} ${v.doctor.last_name}`.toLowerCase().includes(q))
-    );
-  }, [visits, searchQuery]);
+    if (q) {
+      result = result.filter(
+        (v) =>
+          `${v.patient.first_name} ${v.patient.last_name}`.toLowerCase().includes(q) ||
+          v.patient.unique_id.toLowerCase().includes(q) ||
+          v.patient.mobile.includes(q) ||
+          (v.doctor && `${v.doctor.first_name} ${v.doctor.last_name}`.toLowerCase().includes(q))
+      );
+    }
+
+    return result;
+  }, [visits, selectedDate, filterPaymentStatus, filterVisitType, searchQuery]);
 
   return (
     <div className="flex min-h-screen flex-col bg-slate-900 font-body-md text-slate-100">
       <Header activeItem="Visit Book" />
 
       <main className="mx-auto flex w-full max-w-7xl flex-1 flex-col px-4 py-8 md:px-16">
-        <div className="flex flex-col md:flex-row justify-between items-start md:items-center gap-4 mb-8">
-          <div>
-            <h1 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
-              <HeartPulse className="text-blue-500 w-8 h-8" />
-              Rajkiran Visit Log
-            </h1>
-            <p className="text-slate-400 text-sm mt-1">Complete historic index of all patient encounters.</p>
-          </div>
-          <div className="w-full md:w-80 relative">
-            <Search className="absolute left-3 top-2.5 h-4 w-4 text-slate-400" />
+        <div className="flex flex-col gap-2 mb-8">
+          <h1 className="text-3xl font-extrabold tracking-tight text-white flex items-center gap-2">
+            <HeartPulse className="text-blue-500 w-8 h-8" />
+            Rajkiran Visit Log
+          </h1>
+          <p className="text-slate-400 text-sm">Complete historic index of all patient encounters.</p>
+        </div>
+
+        {/* Image 2 Style Search, Date, Filters & Refresh Row */}
+        <div className="bg-white border border-slate-200 rounded-xl p-3 flex flex-col md:flex-row items-center gap-3 shadow-sm mb-4 text-slate-800">
+          {/* Search Input */}
+          <div className="flex-1 w-full relative">
+            <Search className="absolute left-3.5 top-3.5 h-4 w-4 text-slate-400" />
             <input
               type="text"
-              placeholder="Search by name, ID or mobile..."
+              placeholder="Search by patient name, ID, or mobile..."
               value={searchQuery}
               onChange={(e) => setSearchQuery(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-xl py-2 pl-10 pr-4 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
+              className="w-full bg-slate-50 border border-slate-250 rounded-lg py-2.5 pl-10 pr-4 text-sm text-slate-800 placeholder-slate-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all"
             />
           </div>
+
+          {/* Date Picker */}
+          <div className="relative w-full md:w-auto min-w-[180px]">
+            <input
+              type="date"
+              value={selectedDate}
+              onChange={(e) => setSelectedDate(e.target.value)}
+              className="w-full bg-slate-50 border border-slate-250 rounded-lg py-2.5 px-3 text-sm text-slate-800 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent transition-all font-semibold"
+            />
+          </div>
+
+          {/* Filters Toggle Button */}
+          <button
+            onClick={() => setShowFilters(!showFilters)}
+            className={`w-full md:w-auto px-4 py-2.5 border rounded-lg text-sm font-semibold transition-all flex items-center justify-center gap-1.5 cursor-pointer ${
+              showFilters || filterPaymentStatus !== "all" || filterVisitType !== "all"
+                ? "bg-blue-50 border-blue-200 text-blue-600"
+                : "bg-slate-50 border-slate-250 text-slate-600 hover:bg-slate-100"
+            }`}
+          >
+            Filters
+          </button>
+
+          {/* Refresh Button */}
+          <button
+            onClick={handleRefresh}
+            disabled={refreshing}
+            className="w-full md:w-auto p-2.5 bg-slate-50 border border-slate-250 hover:bg-slate-100 text-slate-600 rounded-lg transition-all flex items-center justify-center cursor-pointer disabled:opacity-50"
+            title="Refresh logs"
+          >
+            <RefreshCw className={`h-4 w-4 ${refreshing ? "animate-spin text-blue-500" : ""}`} />
+          </button>
+        </div>
+
+        {/* Collapsible Filters Panel */}
+        {showFilters && (
+          <div className="bg-slate-100 border border-slate-200 rounded-xl p-4 mb-4 grid grid-cols-1 sm:grid-cols-2 gap-4 text-slate-800">
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Payment Status</label>
+              <div className="flex gap-2">
+                {["all", "paid", "pending"].map((status) => (
+                  <button
+                    key={status}
+                    onClick={() => setFilterPaymentStatus(status)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold capitalize transition-all cursor-pointer ${
+                      filterPaymentStatus === status
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    {status}
+                  </button>
+                ))}
+              </div>
+            </div>
+            <div>
+              <label className="block text-xs font-bold text-slate-500 uppercase tracking-wider mb-2">Visit Type</label>
+              <div className="flex gap-2">
+                {["all", "OPD", "IPD"].map((type) => (
+                  <button
+                    key={type}
+                    onClick={() => setFilterVisitType(type)}
+                    className={`px-3 py-1.5 rounded-lg text-xs font-bold transition-all cursor-pointer ${
+                      filterVisitType === type
+                        ? "bg-blue-600 text-white shadow-xs"
+                        : "bg-white border border-slate-200 text-slate-600 hover:bg-slate-50"
+                    }`}
+                  >
+                    {type}
+                  </button>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Summary status text line */}
+        <div className="text-slate-400 text-xs font-semibold mb-4 px-1">
+          {filteredVisits.length} of {visits.length} visits {selectedDate ? `for ${new Date(selectedDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}` : "in total"}
         </div>
 
         {loading ? (
