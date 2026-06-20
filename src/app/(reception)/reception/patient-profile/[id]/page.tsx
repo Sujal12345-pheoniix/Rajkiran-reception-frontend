@@ -20,6 +20,7 @@ import { getPatientById } from "@/lib/actions/patientForm";
 import { logPatientDownloadRequest } from "@/lib/api-client";
 import { getAccessToken } from "@/lib/auth";
 import Link from "next/link";
+import Image from "next/image";
 import { Header } from "@/components/Header";
 import { Footer } from "@/components/Footer";
 
@@ -436,62 +437,119 @@ export default function PatientProfilePage({
         }}
       >
         {/* sideline margin - vertical line */}
-        <div className="absolute top-[180px] bottom-[120px] left-[200px] w-[1.5px] bg-slate-400"></div>
+        <div className="absolute top-[235px] bottom-[120px] left-[200px] w-[1.5px] bg-slate-400"></div>
 
-        {/* Hospital Name on Top-Centre */}
-        <div className="text-center border-b-2 border-slate-900 pb-3 mb-4">
-          <h1 className="text-2xl font-extrabold tracking-wide uppercase">RAJKIRAN SUPER-SPECIALITY HOSPITAL</h1>
-          <p className="text-xs text-slate-500 font-mono mt-1">Patna, Bihar, India | Contact: +91 98765 43210</p>
+        {/* Hospital Logo & Name on Top-Centre */}
+        <div className="flex flex-col items-center border-b-2 border-slate-900 pb-2 mb-3">
+          <Image
+            src="/reference/logo.png"
+            alt="Rajkiran Hospital Logo"
+            width={50}
+            height={50}
+            className="mb-1"
+          />
+          <h1 className="text-xl font-extrabold tracking-wide uppercase">RAJKIRAN SUPER-SPECIALITY HOSPITAL</h1>
+          <p className="text-xs text-slate-500 font-mono mt-0.5">Contact: +91 98765 43210</p>
         </div>
 
-        {/* Patient Name / info bar at top */}
-        <div className="grid grid-cols-3 gap-2 text-sm border-b border-slate-300 pb-2 mb-6 font-semibold">
-          <div>
-            <span className="text-slate-600 font-medium">Patient Name: </span>
-            <span className="font-bold uppercase text-slate-900">{patient.first_name} {patient.last_name}</span>
-          </div>
-          <div className="text-center">
-            <span className="text-slate-600 font-medium">Age / Gender: </span>
-            <span className="font-bold text-slate-900">{calculateAge(patient.dob)} Yrs / {patient.gender}</span>
-          </div>
-          <div className="text-right">
-            <span className="text-slate-600 font-medium">Date: </span>
-            <span className="font-bold text-slate-900">{new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "2-digit", year: "numeric" })}</span>
-          </div>
-        </div>
+        {/* Patient Name / info bar at top (3-row layout for vitals + blood group) */}
+        {(() => {
+          const latestVisit = visits.find((v: any) => v.vitals);
+          const vitals = latestVisit?.vitals || {};
+          return (
+            <div className="grid grid-cols-3 gap-y-1.5 text-xs border-b border-slate-300 pb-2 mb-4 font-semibold">
+              <div>
+                <span className="text-slate-500 font-medium">Patient Name: </span>
+                <span className="font-bold uppercase text-slate-900">{patient.first_name} {patient.last_name}</span>
+              </div>
+              <div className="text-center">
+                <span className="text-slate-500 font-medium">Age / Gender: </span>
+                <span className="font-bold text-slate-900">{calculateAge(patient.dob)} Yrs / {patient.gender}</span>
+              </div>
+              <div className="text-right">
+                <span className="text-slate-500 font-medium">Date: </span>
+                <span className="font-bold text-slate-900">{new Date().toLocaleDateString("en-IN", { day: "2-digit", month: "2-digit", year: "numeric" })}</span>
+              </div>
+
+              {/* Row 2: Height, Weight, BP */}
+              <div>
+                <span className="text-slate-500 font-medium">Height: </span>
+                <span className="font-bold text-slate-900">{vitals.height ? `${vitals.height} cm` : "—"}</span>
+              </div>
+              <div className="text-center">
+                <span className="text-slate-500 font-medium">Weight: </span>
+                <span className="font-bold text-slate-900">{vitals.weight ? `${vitals.weight} Kg` : "—"}</span>
+              </div>
+              <div className="text-right">
+                <span className="text-slate-500 font-medium">BP: </span>
+                <span className="font-bold text-slate-900">{vitals.blood_pressure || "—"}</span>
+              </div>
+
+              {/* Row 3: BMI, Blood Group, UHID */}
+              <div>
+                <span className="text-slate-500 font-medium">BMI: </span>
+                <span className="font-bold text-slate-900">{vitals.bmi || "—"}</span>
+              </div>
+              <div className="text-center">
+                <span className="text-slate-500 font-medium">Blood Group: </span>
+                <span className="font-bold text-slate-900 uppercase">{patient.blood_group || "—"}</span>
+              </div>
+              <div className="text-right">
+                <span className="text-slate-500 font-medium">UHID: </span>
+                <span className="font-mono text-slate-900 text-[11px]">{patient.unique_id}</span>
+              </div>
+            </div>
+          );
+        })()}
 
         {/* Content Area */}
         <div className="flex flex-1">
-          {/* Left Sidebar: Vitals */}
-          <div className="w-[170px] pr-4 pt-2 space-y-5">
+          {/* Left Sidebar: All Vitals taken on page 2 */}
+          <div className="w-[170px] pr-4 pt-1 space-y-3.5">
             {(() => {
               const latestVisit = visits.find((v: any) => v.vitals);
               const vitals = latestVisit?.vitals || {};
               return (
                 <>
-                  <div className="border-b border-slate-200 pb-1">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">Weight</span>
-                    <span className="text-sm font-semibold text-slate-800">{vitals.weight ? `${vitals.weight} Kg` : "—"}</span>
+                  <div className="border-b border-slate-200 pb-0.5">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Weight</span>
+                    <span className="text-xs font-semibold text-slate-800">{vitals.weight ? `${vitals.weight} Kg` : "—"}</span>
                   </div>
-                  <div className="border-b border-slate-200 pb-1">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">SpO2</span>
-                    <span className="text-sm font-semibold text-slate-800">{vitals.oxygen_saturation ? `${vitals.oxygen_saturation} %` : "—"}</span>
+                  <div className="border-b border-slate-200 pb-0.5">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Height</span>
+                    <span className="text-xs font-semibold text-slate-800">{vitals.height ? `${vitals.height} cm` : "—"}</span>
                   </div>
-                  <div className="border-b border-slate-200 pb-1">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">Blood Pressure</span>
-                    <span className="text-sm font-semibold text-slate-800">{vitals.blood_pressure || "—"}</span>
+                  <div className="border-b border-slate-200 pb-0.5">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">BMI</span>
+                    <span className="text-xs font-semibold text-slate-800">{vitals.bmi || "—"}</span>
                   </div>
-                  <div className="border-b border-slate-200 pb-1">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">Pulse Rate</span>
-                    <span className="text-sm font-semibold text-slate-800">{vitals.heart_rate ? `${vitals.heart_rate} bpm` : "—"}</span>
+                  <div className="border-b border-slate-200 pb-0.5">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Blood Pressure</span>
+                    <span className="text-xs font-semibold text-slate-800">{vitals.blood_pressure || "—"}</span>
                   </div>
-                  <div className="border-b border-slate-200 pb-1">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">Temperature</span>
-                    <span className="text-sm font-semibold text-slate-800">{vitals.temperature ? `${vitals.temperature} °F` : "—"}</span>
+                  <div className="border-b border-slate-200 pb-0.5">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Pulse Rate</span>
+                    <span className="text-xs font-semibold text-slate-800">{vitals.heart_rate ? `${vitals.heart_rate} bpm` : "—"}</span>
                   </div>
-                  <div className="border-b border-slate-200 pb-1">
-                    <span className="text-[10px] text-slate-400 font-bold uppercase block tracking-wider">Blood Sugar</span>
-                    <span className="text-sm font-semibold text-slate-800">{vitals.blood_sugar ? `${vitals.blood_sugar} mg/dL` : "—"}</span>
+                  <div className="border-b border-slate-200 pb-0.5">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">SpO2 (Oxygen)</span>
+                    <span className="text-xs font-semibold text-slate-800">{vitals.oxygen_saturation ? `${vitals.oxygen_saturation} %` : "—"}</span>
+                  </div>
+                  <div className="border-b border-slate-200 pb-0.5">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Temperature</span>
+                    <span className="text-xs font-semibold text-slate-800">{vitals.temperature ? `${vitals.temperature} °F` : "—"}</span>
+                  </div>
+                  <div className="border-b border-slate-200 pb-0.5">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Resp. Rate</span>
+                    <span className="text-xs font-semibold text-slate-800">{vitals.respiratory_rate ? `${vitals.respiratory_rate} /min` : "—"}</span>
+                  </div>
+                  <div className="border-b border-slate-200 pb-0.5">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Blood Sugar</span>
+                    <span className="text-xs font-semibold text-slate-800">{vitals.blood_sugar ? `${vitals.blood_sugar} mg/dL` : "—"}</span>
+                  </div>
+                  <div className="border-b border-slate-200 pb-0.5">
+                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Pain Scale</span>
+                    <span className="text-xs font-semibold text-slate-800">{vitals.pain_scale !== null && vitals.pain_scale !== undefined ? `${vitals.pain_scale} / 10` : "—"}</span>
                   </div>
                 </>
               );
