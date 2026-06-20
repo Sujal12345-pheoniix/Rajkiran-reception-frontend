@@ -437,7 +437,7 @@ export default function PatientProfilePage({
         }}
       >
         {/* sideline margin - vertical line */}
-        <div className="absolute top-[235px] bottom-[120px] left-[200px] w-[1.5px] bg-slate-400"></div>
+        <div className="absolute top-[235px] bottom-[120px] left-[80px] w-[1.5px] bg-slate-400"></div>
 
         {/* Hospital Logo & Name on Top-Centre */}
         <div className="flex flex-col items-center border-b-2 border-slate-900 pb-2 mb-3">
@@ -505,60 +505,8 @@ export default function PatientProfilePage({
 
         {/* Content Area */}
         <div className="flex flex-1">
-          {/* Left Sidebar: All Vitals taken on page 2 */}
-          <div className="w-[170px] pr-4 pt-1 space-y-3.5">
-            {(() => {
-              const latestVisit = visits.find((v: any) => v.vitals);
-              const vitals = latestVisit?.vitals || {};
-              return (
-                <>
-                  <div className="border-b border-slate-200 pb-0.5">
-                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Weight</span>
-                    <span className="text-xs font-semibold text-slate-800">{vitals.weight ? `${vitals.weight} Kg` : "—"}</span>
-                  </div>
-                  <div className="border-b border-slate-200 pb-0.5">
-                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Height</span>
-                    <span className="text-xs font-semibold text-slate-800">{vitals.height ? `${vitals.height} cm` : "—"}</span>
-                  </div>
-                  <div className="border-b border-slate-200 pb-0.5">
-                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">BMI</span>
-                    <span className="text-xs font-semibold text-slate-800">{vitals.bmi || "—"}</span>
-                  </div>
-                  <div className="border-b border-slate-200 pb-0.5">
-                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Blood Pressure</span>
-                    <span className="text-xs font-semibold text-slate-800">{vitals.blood_pressure || "—"}</span>
-                  </div>
-                  <div className="border-b border-slate-200 pb-0.5">
-                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Pulse Rate</span>
-                    <span className="text-xs font-semibold text-slate-800">{vitals.heart_rate ? `${vitals.heart_rate} bpm` : "—"}</span>
-                  </div>
-                  <div className="border-b border-slate-200 pb-0.5">
-                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">SpO2 (Oxygen)</span>
-                    <span className="text-xs font-semibold text-slate-800">{vitals.oxygen_saturation ? `${vitals.oxygen_saturation} %` : "—"}</span>
-                  </div>
-                  <div className="border-b border-slate-200 pb-0.5">
-                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Temperature</span>
-                    <span className="text-xs font-semibold text-slate-800">{vitals.temperature ? `${vitals.temperature} °F` : "—"}</span>
-                  </div>
-                  <div className="border-b border-slate-200 pb-0.5">
-                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Resp. Rate</span>
-                    <span className="text-xs font-semibold text-slate-800">{vitals.respiratory_rate ? `${vitals.respiratory_rate} /min` : "—"}</span>
-                  </div>
-                  <div className="border-b border-slate-200 pb-0.5">
-                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Blood Sugar</span>
-                    <span className="text-xs font-semibold text-slate-800">{vitals.blood_sugar ? `${vitals.blood_sugar} mg/dL` : "—"}</span>
-                  </div>
-                  <div className="border-b border-slate-200 pb-0.5">
-                    <span className="text-[9px] text-slate-400 font-bold uppercase block tracking-wider">Pain Scale</span>
-                    <span className="text-xs font-semibold text-slate-800">{vitals.pain_scale !== null && vitals.pain_scale !== undefined ? `${vitals.pain_scale} / 10` : "—"}</span>
-                  </div>
-                </>
-              );
-            })()}
-          </div>
-
-          {/* Right main area - completely blank */}
-          <div className="flex-1 pl-8 relative flex items-center justify-center">
+          {/* Main writing area - completely blank with watermark */}
+          <div className="flex-1 pl-[100px] relative flex items-center justify-center">
             {/* Watermark Logo */}
             <div className="opacity-[0.06] pointer-events-none absolute">
               <Image 
