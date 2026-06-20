@@ -557,7 +557,17 @@ export default function PatientProfilePage({
           </div>
 
           {/* Right main area - completely blank */}
-          <div className="flex-1 pl-8">
+          <div className="flex-1 pl-8 relative flex items-center justify-center">
+            {/* Watermark Logo */}
+            <div className="opacity-[0.06] pointer-events-none absolute">
+              <Image 
+                src="/reference/logo.png" 
+                alt="Watermark Logo" 
+                width={280} 
+                height={280} 
+                priority 
+              />
+            </div>
             {/* Blank space for doctor to write */}
           </div>
         </div>
