@@ -84,6 +84,11 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
     return diffDays;
   }, [ipdAdmissionDate, ipdDischargeDate]);
 
+  // Vitals states for BMI calculation (OPD Mode)
+  const [weight, setWeight] = useState("");
+  const [height, setHeight] = useState("");
+  const [bmi, setBmi] = useState<number | null>(null);
+
   // Symptoms searchable selector
   const [symptomSearch, setSymptomSearch] = useState("");
   const [selectedSymptoms, setSelectedSymptoms] = useState<string[]>([]);
@@ -201,7 +206,17 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
     }
   }, [selectedDoctorId, filteredDoctors]);
 
-  // Removed BMI auto calculation as vitals are replaced by OPD/IPD selection
+  // Auto calculate BMI for OPD Vitals
+  useEffect(() => {
+    const w = parseFloat(weight);
+    const h = parseFloat(height) / 100; // to meters
+    if (w > 0 && h > 0) {
+      const val = w / (h * h);
+      setBmi(parseFloat(val.toFixed(2)));
+    } else {
+      setBmi(null);
+    }
+  }, [weight, height]);
 
   // Auto Disease Suggestions based on symptoms selector
   const diseaseSuggestions = useMemo(() => {
@@ -461,12 +476,118 @@ export default function PatientVisit({ patientId }: { patientId: string }) {
             </div>
 
             {assignmentType === "OPD" ? (
-              <div className="bg-slate-50 border border-slate-100 rounded-xl p-5 text-center space-y-2">
-                <Activity className="w-8 h-8 text-blue-500 mx-auto" />
-                <h4 className="font-bold text-xs text-slate-700 uppercase tracking-wide">Outpatient Department (OPD) Mode</h4>
-                <p className="text-[11px] text-slate-500 max-w-sm mx-auto leading-relaxed">
-                  The patient will consult with the doctor on a walk-in or appointment basis and will not be admitted to the hospital. No stay duration details required.
-                </p>
+              <div className="space-y-4">
+                <div className="bg-slate-50 border border-slate-200/60 rounded-xl p-4 flex items-center gap-3">
+                  <Activity className="w-5 h-5 text-blue-600 flex-shrink-0" />
+                  <div>
+                    <h4 className="font-bold text-slate-800 text-xs uppercase tracking-wide">Outpatient Department (OPD) Vitals</h4>
+                    <p className="text-[10px] text-slate-500 mt-0.5">Please check and record clinical telemetry vitals for the consulting doctor.</p>
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-4">
+                  <div>
+                    <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Blood Pressure</label>
+                    <input
+                      type="text"
+                      name="bloodPressure"
+                      placeholder="e.g. 120/80"
+                      defaultValue={lastVitals?.blood_pressure || ""}
+                      className="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 focus:outline-none bg-slate-50/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Heart Rate (bpm)</label>
+                    <input
+                      type="number"
+                      name="heartRate"
+                      placeholder="e.g. 72"
+                      defaultValue={lastVitals?.heart_rate || ""}
+                      className="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 focus:outline-none bg-slate-50/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Temperature (°F)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      name="temperature"
+                      placeholder="e.g. 98.6"
+                      defaultValue={lastVitals?.temperature ? Number(lastVitals.temperature) : ""}
+                      className="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 focus:outline-none bg-slate-50/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Weight (kg)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      name="weight"
+                      placeholder="e.g. 70"
+                      value={weight}
+                      onChange={(e) => setWeight(e.target.value)}
+                      className="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 focus:outline-none bg-slate-50/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Height (cm)</label>
+                    <input
+                      type="number"
+                      step="0.1"
+                      name="height"
+                      placeholder="e.g. 170"
+                      value={height}
+                      onChange={(e) => setHeight(e.target.value)}
+                      className="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 focus:outline-none bg-slate-50/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">BMI (Auto)</label>
+                    <div className="w-full px-3 py-2 border rounded-lg bg-slate-100 text-xs font-semibold text-slate-700">
+                      {bmi !== null ? `${bmi} (${bmi < 18.5 ? 'Underweight' : bmi < 25 ? 'Normal' : 'Overweight'})` : "N/A"}
+                    </div>
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Oxygen Saturation (SpO2)</label>
+                    <input
+                      type="number"
+                      name="oxygenSaturation"
+                      placeholder="e.g. 98"
+                      className="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 focus:outline-none bg-slate-50/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Respiratory Rate</label>
+                    <input
+                      type="number"
+                      name="respiratoryRate"
+                      placeholder="e.g. 16"
+                      className="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 focus:outline-none bg-slate-50/50"
+                    />
+                  </div>
+                  <div>
+                    <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Blood Sugar (mg/dL)</label>
+                    <input
+                      type="number"
+                      name="bloodSugar"
+                      placeholder="e.g. 110"
+                      className="w-full text-xs px-3 py-2 border rounded-lg focus:ring-2 focus:ring-blue-200 focus:outline-none bg-slate-50/50"
+                    />
+                  </div>
+                  <div className="col-span-2">
+                    <label className="block text-slate-500 font-bold text-[10px] uppercase mb-1">Pain Scale (0 - 10)</label>
+                    <div className="flex gap-1">
+                      {[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10].map((num) => (
+                        <label key={num} className="flex-1 cursor-pointer">
+                          <input type="radio" name="painScale" value={num} className="sr-only peer" />
+                          <div className="h-7 border border-slate-200 flex items-center justify-center text-[10px] font-bold rounded hover:bg-slate-50 peer-checked:bg-blue-600 peer-checked:text-white transition">
+                            {num}
+                          </div>
+                        </label>
+                      ))}
+                    </div>
+                  </div>
+                </div>
               </div>
             ) : (
               <div className="space-y-4">
