@@ -56,7 +56,8 @@ import {
   updateVisitRequest,
   deleteVisitRequest,
   getDepartmentsRequest,
-  getPatientsRequest
+  getPatientsRequest,
+  createPatientRequest
 } from "@/lib/api-client";
 import { getAccessToken } from "@/lib/auth";
 
@@ -170,6 +171,21 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
   const [deleteImpact, setDeleteImpact] = useState<any | null>(null);
   const [loadingImpact, setLoadingImpact] = useState(false);
   const [permanentDelete, setPermanentDelete] = useState(false);
+
+  // Add Patient Modal States
+  const [showAddPatientModal, setShowAddPatientModal] = useState(false);
+  const [addingPatient, setAddingPatient] = useState(false);
+  const [patientFormError, setPatientFormError] = useState("");
+  const [patientForm, setPatientForm] = useState({
+    first_name: "",
+    last_name: "",
+    dob: "",
+    gender: "male",
+    mobile: "",
+    email: "",
+    address: "",
+    blood_group: "Unknown",
+  });
 
   const metrics = initialData.metrics;
   const trends = initialData.trends || {
@@ -362,6 +378,65 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
       console.error("Failed fetching next page of patients:", err);
     } finally {
       setLoadingMorePatients(false);
+    }
+  };
+
+  const handleAddPatientSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!patientForm.first_name || !patientForm.last_name || !patientForm.dob || !patientForm.mobile) {
+      setPatientFormError("Please fill all required fields marked with *.");
+      return;
+    }
+    if (patientForm.mobile.length !== 10 || !/^\d+$/.test(patientForm.mobile)) {
+      setPatientFormError("Mobile number must be exactly 10 digits.");
+      return;
+    }
+    setPatientFormError("");
+    setAddingPatient(true);
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+
+      const payload = {
+        first_name: patientForm.first_name,
+        last_name: patientForm.last_name,
+        dob: new Date(patientForm.dob).toISOString(),
+        gender: patientForm.gender,
+        mobile: patientForm.mobile,
+        email: patientForm.email || undefined,
+        address: patientForm.address || undefined,
+        blood_group: patientForm.blood_group === "Unknown" ? undefined : patientForm.blood_group,
+        chronic_conditions: [],
+      };
+
+      const res = await createPatientRequest(payload, token);
+      if (res.success) {
+        alert("Patient registered successfully!");
+        setShowAddPatientModal(false);
+        setPatientForm({
+          first_name: "",
+          last_name: "",
+          dob: "",
+          gender: "male",
+          mobile: "",
+          email: "",
+          address: "",
+          blood_group: "Unknown",
+        });
+        window.location.reload();
+      }
+    } catch (err: any) {
+      console.error(err);
+      let errMsg = "Failed to register patient.";
+      if (err?.response) {
+        try {
+          const body = await err.response.json();
+          if (body?.message) errMsg = body.message;
+        } catch {}
+      }
+      setPatientFormError(errMsg);
+    } finally {
+      setAddingPatient(false);
     }
   };
 
@@ -868,12 +943,21 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
               <div className="bg-white rounded-xl border border-slate-200 shadow-sm overflow-hidden">
                 <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
                   <h3 className="font-bold text-slate-900 text-sm">Patients Registry (Report Center)</h3>
-                  <button
-                    onClick={() => exportToCSV(patients, "patients_list.csv")}
-                    className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
-                  >
-                    Export Data (CSV)
-                  </button>
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setShowAddPatientModal(true)}
+                      className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                    >
+                      <UserPlus size={12} />
+                      Add Patient
+                    </button>
+                    <button
+                      onClick={() => exportToCSV(patients, "patients_list.csv")}
+                      className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
+                    >
+                      Export Data (CSV)
+                    </button>
+                  </div>
                 </div>
                 <div className="overflow-x-auto">
                   <table className="w-full border-collapse text-left">
@@ -1551,7 +1635,16 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
 
               {/* Row 5: Patient search and deletion */}
               <div className="bg-white p-5 rounded-xl border border-slate-200 shadow-sm space-y-4">
-                <h3 className="font-bold text-slate-900 text-sm">Administrative Patient Deletion</h3>
+                <div className="flex justify-between items-center">
+                  <h3 className="font-bold text-slate-900 text-sm">Administrative Patient Deletion</h3>
+                  <button
+                    onClick={() => setShowAddPatientModal(true)}
+                    className="px-3 py-1.5 rounded-lg bg-teal-600 hover:bg-teal-700 text-white text-xs font-bold transition flex items-center gap-1.5 shadow-sm"
+                  >
+                    <UserPlus size={12} />
+                    Add Patient
+                  </button>
+                </div>
                 <p className="text-xs text-slate-500">
                   Search patients by name or ID to initiate a soft delete or hard delete with full impact validation.
                 </p>
@@ -1571,6 +1664,24 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
                     </div>
                   ))}
                 </div>
+                {hasMorePatients && (
+                  <div className="flex justify-center pt-2">
+                    <button
+                      onClick={loadMorePatients}
+                      disabled={loadingMorePatients}
+                      className="px-4 py-2 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 hover:bg-blue-100 disabled:opacity-50 rounded-lg transition shadow-sm flex items-center gap-2"
+                    >
+                      {loadingMorePatients ? (
+                        <>
+                          <RefreshCw size={12} className="animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        "View More Patients"
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           )}
@@ -1858,6 +1969,165 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
       )}
 
       {/* OVERLAY MODAL: GENERAL BILL VIEWER IN REVERE */}
+
+      {/* OVERLAY MODAL: ADD PATIENT */}
+      {showAddPatientModal && (
+        <div className="fixed inset-0 z-50 bg-slate-900/60 backdrop-blur-xs flex items-center justify-center p-4">
+          <form onSubmit={handleAddPatientSubmit} className="bg-white rounded-xl max-w-lg w-full p-6 space-y-4 shadow-xl border border-slate-100 text-slate-800 text-xs">
+            <h3 className="font-black text-lg text-slate-900">
+              Register New Patient
+            </h3>
+            
+            {patientFormError && (
+              <div className="p-3 bg-rose-50 border border-rose-100 text-rose-600 rounded-lg text-xs font-semibold">
+                {patientFormError}
+              </div>
+            )}
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">First Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={patientForm.first_name}
+                  onChange={(e) => setPatientForm(prev => ({ ...prev, first_name: e.target.value }))}
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
+                  placeholder="e.g. John"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Last Name *</label>
+                <input
+                  type="text"
+                  required
+                  value={patientForm.last_name}
+                  onChange={(e) => setPatientForm(prev => ({ ...prev, last_name: e.target.value }))}
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
+                  placeholder="e.g. Doe"
+                />
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Date of Birth *</label>
+                <input
+                  type="date"
+                  required
+                  value={patientForm.dob}
+                  onChange={(e) => setPatientForm(prev => ({ ...prev, dob: e.target.value }))}
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Gender *</label>
+                <select
+                  value={patientForm.gender}
+                  onChange={(e) => setPatientForm(prev => ({ ...prev, gender: e.target.value }))}
+                  className="w-full p-2 bg-white border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                >
+                  <option value="male">Male</option>
+                  <option value="female">Female</option>
+                  <option value="other">Other</option>
+                </select>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Mobile Contact *</label>
+                <input
+                  type="text"
+                  required
+                  maxLength={10}
+                  value={patientForm.mobile}
+                  onChange={(e) => setPatientForm(prev => ({ ...prev, mobile: e.target.value.replace(/\D/g, "") }))}
+                  className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
+                  placeholder="10-digit mobile"
+                />
+              </div>
+              <div>
+                <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Blood Group</label>
+                <select
+                  value={patientForm.blood_group}
+                  onChange={(e) => setPatientForm(prev => ({ ...prev, blood_group: e.target.value }))}
+                  className="w-full p-2 bg-white border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500"
+                >
+                  <option value="Unknown">Unknown</option>
+                  <option value="A+">A+</option>
+                  <option value="A-">A-</option>
+                  <option value="B+">B+</option>
+                  <option value="B-">B-</option>
+                  <option value="AB+">AB+</option>
+                  <option value="AB-">AB-</option>
+                  <option value="O+">O+</option>
+                  <option value="O-">O-</option>
+                </select>
+              </div>
+            </div>
+
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Email Address</label>
+              <input
+                type="email"
+                value={patientForm.email}
+                onChange={(e) => setPatientForm(prev => ({ ...prev, email: e.target.value }))}
+                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
+                placeholder="e.g. john.doe@example.com"
+              />
+            </div>
+
+            <div>
+              <label className="block text-[10px] uppercase font-bold text-slate-500 mb-1">Residential Address</label>
+              <textarea
+                value={patientForm.address}
+                onChange={(e) => setPatientForm(prev => ({ ...prev, address: e.target.value }))}
+                className="w-full p-2 border rounded-lg focus:outline-none focus:ring-1 focus:ring-teal-500 bg-white"
+                rows={2}
+                placeholder="Street address, City, etc."
+              />
+            </div>
+
+            <div className="flex gap-2 justify-end pt-3 text-xs">
+              <button
+                type="button"
+                onClick={() => {
+                  setShowAddPatientModal(false);
+                  setPatientFormError("");
+                  setPatientForm({
+                    first_name: "",
+                    last_name: "",
+                    dob: "",
+                    gender: "male",
+                    mobile: "",
+                    email: "",
+                    address: "",
+                    blood_group: "Unknown",
+                  });
+                }}
+                className="px-4 py-2 border rounded-lg font-semibold hover:bg-slate-50"
+              >
+                Cancel
+              </button>
+              <button
+                type="submit"
+                disabled={addingPatient}
+                className="px-4 py-2 bg-teal-600 hover:bg-teal-700 text-white font-bold rounded-lg disabled:opacity-50 flex items-center gap-1.5"
+              >
+                {addingPatient ? (
+                  <>
+                    <RefreshCw size={12} className="animate-spin" />
+                    Registering...
+                  </>
+                ) : (
+                  "Register Patient"
+                )}
+              </button>
+            </div>
+          </form>
+        </div>
+      )}
     </div>
   );
 }
