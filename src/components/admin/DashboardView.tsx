@@ -55,7 +55,8 @@ import {
   updatePatientRequest,
   updateVisitRequest,
   deleteVisitRequest,
-  getDepartmentsRequest
+  getDepartmentsRequest,
+  getPatientsRequest
 } from "@/lib/api-client";
 import { getAccessToken } from "@/lib/auth";
 
@@ -145,6 +146,14 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
   const [doctorsRegistry, setDoctorsRegistry] = useState<any[]>(initialData.doctorsList);
   const [departmentsRegistry, setDepartmentsRegistry] = useState<any[]>([]);
   const [loadingDepartments, setLoadingDepartments] = useState(false);
+
+  // Patient Registry Pagination States
+  const [patients, setPatients] = useState<any[]>(initialData.recentPatients);
+  const [patientsPage, setPatientsPage] = useState(1);
+  const [loadingMorePatients, setLoadingMorePatients] = useState(false);
+  const [hasMorePatients, setHasMorePatients] = useState(
+    initialData.recentPatients.length < (initialData.metrics?.totalPatients || 0)
+  );
 
   // Doctor form modals
   const [selectedDoctor, setSelectedDoctor] = useState<any | null>(null);
@@ -300,7 +309,7 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
   ];
 
   // Filters
-  const filteredPatients = initialData.recentPatients.filter((p) =>
+  const filteredPatients = patients.filter((p) =>
     `${p.first_name} ${p.last_name} ${p.unique_id} ${p.mobile}`.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
@@ -329,6 +338,31 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
     a.setAttribute("href", url);
     a.setAttribute("download", filename);
     a.click();
+  };
+
+  const loadMorePatients = async () => {
+    if (loadingMorePatients) return;
+    setLoadingMorePatients(true);
+    try {
+      const token = await getAccessToken();
+      if (!token) return;
+
+      const nextPage = patientsPage + 1;
+      const res = await getPatientsRequest(nextPage, 10, token);
+      if (res && res.success && res.data) {
+        setPatients((prev) => [...prev, ...res.data]);
+        setPatientsPage(nextPage);
+        if (res.meta) {
+          setHasMorePatients(patients.length + res.data.length < res.meta.total);
+        } else {
+          setHasMorePatients(res.data.length === 10);
+        }
+      }
+    } catch (err) {
+      console.error("Failed fetching next page of patients:", err);
+    } finally {
+      setLoadingMorePatients(false);
+    }
   };
 
   // 1. Backup DB Handler
@@ -835,7 +869,7 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
                 <div className="flex items-center justify-between px-5 py-4 border-b border-slate-200">
                   <h3 className="font-bold text-slate-900 text-sm">Patients Registry (Report Center)</h3>
                   <button
-                    onClick={() => exportToCSV(initialData.recentPatients, "patients_list.csv")}
+                    onClick={() => exportToCSV(patients, "patients_list.csv")}
                     className="px-3 py-1.5 rounded-lg border border-slate-200 bg-white text-xs font-semibold text-slate-700 hover:bg-slate-50 transition"
                   >
                     Export Data (CSV)
@@ -876,6 +910,24 @@ export default function DashboardView({ initialData }: DashboardViewProps) {
                     </tbody>
                   </table>
                 </div>
+                {hasMorePatients && (
+                  <div className="flex justify-center p-4 border-t border-slate-100 bg-slate-50/50">
+                    <button
+                      onClick={loadMorePatients}
+                      disabled={loadingMorePatients}
+                      className="px-4 py-2 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 hover:bg-blue-100 disabled:opacity-50 rounded-lg transition shadow-sm flex items-center gap-2"
+                    >
+                      {loadingMorePatients ? (
+                        <>
+                          <RefreshCw size={12} className="animate-spin" />
+                          Loading...
+                        </>
+                      ) : (
+                        "View More Patients"
+                      )}
+                    </button>
+                  </div>
+                )}
               </div>
 
               {/* REPORT VIEWER SLIDEOVER PANEL (Module 2 Admin Report Center) */}
